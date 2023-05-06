@@ -16,7 +16,7 @@
 - 노트가 정해진 레인을 따르지 않는 리듬게임
     - [osu!](https://osu.ppy.sh/home/)
     - [cytus](https://rayark.com/g/cytus/) \
-    (You can make it similar with a little trick but it would be hard to make slide notes)
+    (약간의 트릭을 써서 비슷해 보이게 만들 수는 있지만, 슬라이드 노트 같은 노트는 구현하기 어려움)
     - [cytusII](https://rayark.com/g/cytus2/)
 
 # 사용방법
