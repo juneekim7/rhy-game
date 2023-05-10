@@ -1,4 +1,4 @@
-# rhygame
+# rhy-game
 make your own web rhythm game easily!
 
 # translation
