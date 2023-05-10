@@ -1,0 +1,35 @@
+{
+  "name": "rhy-game",
+  "version": "1.0.0",
+  "description": "make your own web rhythm game easily!",
+  "main": "dist/rhy-game.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juneekim7/rhygame.git"
+  },
+  "files": [
+    "dist",
+    "lib"
+  ],
+  "keywords": [
+    "web",
+    "rhythm",
+    "game",
+    "rhygame",
+    "rhy-game"
+  ],
+  "author": {
+    "name": "Junee",
+    "email": "juneekim7@gmail.com",
+    "url": "http://www.juneekim7.kro.kr"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/juneekim7/rhygame/issues"
+  },
+  "homepage": "https://github.com/juneekim7/rhygame#readme"
+}
