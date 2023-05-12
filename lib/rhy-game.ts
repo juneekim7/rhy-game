@@ -10,9 +10,41 @@ class Judgement {
     }
 }
 
-class Note {
-    // 아직 안 만듦
+// #region note
+abstract class Note {
+    public className: string
+    public animationName: string
+
+    public constructor(className: string, animationName: string) {
+        this.className = className
+        this.animationName = animationName
+    }
 }
+
+// #region basic note
+class Normal extends Note {
+    public constructor(className: string, animationName: string) {
+        super(className, animationName)
+    }
+}
+
+class Long extends Note {}
+// #endregion
+
+// #region basic mobile note
+class Tab extends Normal {}
+
+class Hold extends Long {}
+// #endregion
+
+// #region advanced note
+class Drag extends Tab {}
+
+class Flick extends Tab {}
+
+class LongFlick extends Hold {}
+// #endregion
+// #endregion
 
 // #region map
 class Info {
@@ -63,27 +95,32 @@ class Map {
 
 // #region game
 type DOM = Record<string, HTMLBodyElement>
-type ClassName = Record<string, string>
+type Notes = Record<string, typeof Note>
 type Judgements = Judgement[]
 
 interface GameParams {
     DOM?: DOM
-    className?: ClassName
+    notes?: Notes
     judgements?: Judgements
 }
 
 class Game {
     public readonly DOM: DOM
-    public readonly className: ClassName
+    public readonly notes: Notes
     public readonly judgements: Judgements
 
-    public play(map: Map) {
-        console.log(`${map.info.title} start`)
+    public play(map: Map, speed = 1000) {
+        console.log(`${map.info.title} start with speed ${speed}ms`)
     }
 
     public constructor({
         DOM = {},
-        className = {},
+        notes = {
+            n: Tab,
+            l: Hold,
+            d: Drag,
+            f: Flick
+        },
         judgements = [
             new Judgement('perfect', 40, true),
             new Judgement('great', 100, true),
@@ -92,10 +129,10 @@ class Game {
         ]
     }: GameParams = {}) {
         this.DOM = DOM
-        this.className = className
+        this.notes = notes
         this.judgements = judgements
     }
 }
 // #endregion
 
-export {Game}
+export { Judgement, Note, Map, Game }

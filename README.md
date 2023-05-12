@@ -43,8 +43,6 @@ Most rhythm games have similar features and mechanism except for design, details
 
 ### Quick Start
 
-### Proper Start
-
 #### Make new game and bind HTML DOM elements
 
 ```js
@@ -60,20 +58,6 @@ const myRhythmGame = new Game({
         judgement: document.getElementById('judgement'),
         score: document.getElementById('score')
     },
-    className: {
-        n: 'normal(short)-note-class-name',
-        l: 'long-note-class-name',
-        s: 'slide-note-class-name',
-        f: 'flick-note-class-name'
-    },
-    judgement: [
-        //new Judgement(name, time, isCombo)
-        new Judgement('perfect', 40, true),
-        new Judgement('great', 100, true),
-        new Judgement('great', 100, true),
-        new Judgement('bad', 500, false)
-        //miss is automatically generated
-    ],
     maxScore: 100000
 })
 ```
@@ -90,7 +74,7 @@ const myOwnMap = new Map({
         level: 5,
         bpm: 120,
         split: 16,
-        
+
         cover: './cover/img.png',
         background: './background/img.png'
     },
@@ -127,13 +111,19 @@ const myOwnMap = new Map({
 })
 ```
 
-#### Play Map
+#### Play Game
 
 ```js
-myRhythmGame.play(myOwnMap)
+myRhythmGame.play(myOwnMap, 'easy')
 ```
 
-### Options
+### Advanced
+
+#### Custom judgements
+
+#### Create your own note
+
+#### Design Tips
 
 ### Examples
 
