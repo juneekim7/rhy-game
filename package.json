@@ -4,7 +4,7 @@
   "description": "make your own web rhythm game easily!",
   "main": "dist/rhy-game.js",
   "scripts": {
-    "build": "tsc ./lib/rhy-game.ts",
+    "build": "tsc -p .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

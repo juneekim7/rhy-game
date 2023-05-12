@@ -12,27 +12,29 @@ class Judgement {
 
 // #region note
 abstract class Note {
-    public readonly className: string
-    public readonly animationName: string
-    public readonly animationDuration: number
+    private readonly className: string
+    private readonly speed: number
+    private readonly fadeAnimation: string
 
-    public generateDOM(laneDOM: HTMLBodyElement) {
+    public createDOM(laneDOM: HTMLBodyElement) {
         const noteDOM = document.createElement('div')
         noteDOM.setAttribute('class', this.className)
-        noteDOM.setAttribute('animationName', this.animationName)
-        noteDOM.setAttribute('animationDuration', this.animationDuration + 'ms')
+        noteDOM.style.animationDuration = this.speed + 'ms'
+
+        noteDOM.addEventListener('animationend', () => {
+            noteDOM.style.animation = `100ms linear ${this.fadeAnimation}`
+            noteDOM.addEventListener('animationend', () => {
+                noteDOM.remove()
+            })
+        })
 
         laneDOM.appendChild(noteDOM)
-        setTimeout(() => {
-            noteDOM.setAttribute('display', 'none')
-            noteDOM.remove()
-        }, 1)
     }
 
-    public constructor(className: string, animationName: string, animationDuration: number) {
+    public constructor(className: string, speed: number, fadeAnimaion: string) {
         this.className = className
-        this.animationName = animationName
-        this.animationDuration = animationDuration
+        this.speed = speed
+        this.fadeAnimation = fadeAnimaion
     }
 }
 
@@ -57,7 +59,7 @@ class LongFlick extends Hold {}
 // #endregion
 // #endregion
 
-// #region map
+// #region song
 class Info {
     public readonly music: string
     public readonly title: string
@@ -84,22 +86,22 @@ class Info {
     }
 }
 
-interface Data {
+interface Chart {
     [mode: string]: []
 }
 
-interface MapParams {
+interface SongParams {
     info: Info,
-    data: Data
+    chart: Chart
 }
 
-class Map {
+class Song {
     public readonly info: Info
-    public readonly data: Data
+    public readonly chart: Chart
 
-    public constructor({ info, data }: MapParams) {
+    public constructor({ info, chart }: SongParams) {
         this.info = info,
-        this.data = data
+        this.chart = chart
     }
 }
 // #endregion
@@ -120,8 +122,8 @@ class Game {
     public readonly notes: Notes
     public readonly judgements: Judgements
 
-    public play(map: Map, speed = 1000) {
-        console.log(`${map.info.title} start with speed ${speed}ms`)
+    public play(song: Song, speed = 1000) {
+        console.log(`${song.info.title} start with speed ${speed}ms`)
     }
 
     public constructor({
@@ -147,9 +149,9 @@ class Game {
 }
 // #endregion
 
-export {
+/* export {
     Judgement,
     Note, Normal, Long,
     Tap, Hold, Drag, Flick, LongFlick,
-    Map, Game
-}
+    Song, Game
+} */

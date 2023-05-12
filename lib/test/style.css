@@ -10,3 +10,21 @@
     height: 25vh;
     border: 1px solid black;
 }
+
+.normal {
+    width: 25vh;
+    height: 25vh;
+    background-color: blue;
+
+    animation: 20ms linear normal-move;
+}
+
+@keyframes normal-move {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(0vw); }
+}
+
+@keyframes normal-fade {
+    0% { width: 25vh; }
+    100% { width: 0vh; }
+}

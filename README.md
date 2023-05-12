@@ -62,10 +62,10 @@ const myRhythmGame = new Game({
 })
 ```
 
-#### Make your own map
+#### Make your own song(chart)
 
 ```js
-const myOwnMap = new Map({
+const myOwnSong = new Song({
     info: {
         music: './music/song.mp3',
         title: 'music title',
@@ -78,7 +78,7 @@ const myOwnMap = new Map({
         cover: './cover/img.png',
         background: './background/img.png'
     },
-    data: {
+    chart: {
         easy: [
             {
                 lane1: 'n***|****|****|****|n***|****|****|****',
@@ -114,7 +114,7 @@ const myOwnMap = new Map({
 #### Play Game
 
 ```js
-myRhythmGame.play(myOwnMap, 'easy')
+myRhythmGame.play(myOwnSong, 'easy')
 ```
 
 ### Advanced
