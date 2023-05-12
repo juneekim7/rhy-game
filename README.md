@@ -121,9 +121,9 @@ myRhythmGame.play(myOwnMap, 'easy')
 
 #### Custom judgements
 
-#### Create your own note
+#### Custom notes
 
-#### Design Tips
+#### Design tips
 
 ### Examples
 

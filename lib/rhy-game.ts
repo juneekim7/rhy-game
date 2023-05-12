@@ -12,35 +12,46 @@ class Judgement {
 
 // #region note
 abstract class Note {
-    public className: string
-    public animationName: string
+    public readonly className: string
+    public readonly animationName: string
+    public readonly animationDuration: number
 
-    public constructor(className: string, animationName: string) {
+    public generateDOM(laneDOM: HTMLBodyElement) {
+        const noteDOM = document.createElement('div')
+        noteDOM.setAttribute('class', this.className)
+        noteDOM.setAttribute('animationName', this.animationName)
+        noteDOM.setAttribute('animationDuration', this.animationDuration + 'ms')
+
+        laneDOM.appendChild(noteDOM)
+        setTimeout(() => {
+            noteDOM.setAttribute('display', 'none')
+            noteDOM.remove()
+        }, 1)
+    }
+
+    public constructor(className: string, animationName: string, animationDuration: number) {
         this.className = className
         this.animationName = animationName
+        this.animationDuration = animationDuration
     }
 }
 
 // #region basic note
-class Normal extends Note {
-    public constructor(className: string, animationName: string) {
-        super(className, animationName)
-    }
-}
+class Normal extends Note {}
 
 class Long extends Note {}
 // #endregion
 
 // #region basic mobile note
-class Tab extends Normal {}
+class Tap extends Normal {}
 
 class Hold extends Long {}
 // #endregion
 
 // #region advanced note
-class Drag extends Tab {}
+class Drag extends Tap {}
 
-class Flick extends Tab {}
+class Flick extends Tap {}
 
 class LongFlick extends Hold {}
 // #endregion
@@ -116,10 +127,11 @@ class Game {
     public constructor({
         DOM = {},
         notes = {
-            n: Tab,
+            n: Tap,
             l: Hold,
             d: Drag,
-            f: Flick
+            f: Flick,
+            t: LongFlick
         },
         judgements = [
             new Judgement('perfect', 40, true),
@@ -135,4 +147,9 @@ class Game {
 }
 // #endregion
 
-export { Judgement, Note, Map, Game }
+export {
+    Judgement,
+    Note, Normal, Long,
+    Tap, Hold, Drag, Flick, LongFlick,
+    Map, Game
+}
