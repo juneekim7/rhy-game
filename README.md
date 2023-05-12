@@ -86,9 +86,11 @@ const myOwnMap = new Map({
         music: './music/song.mp3',
         title: 'music title',
         artist: 'artist',
+
         level: 5,
-        initBpm: 120,
+        bpm: 120,
         split: 16,
+        
         cover: './cover/img.png',
         background: './background/img.png'
     },
