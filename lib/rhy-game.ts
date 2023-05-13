@@ -31,10 +31,10 @@ abstract class Note {
     public createDOM(laneDOM: HTMLBodyElement) {
         const noteDOM = document.createElement('div')
         noteDOM.setAttribute('class', this.className)
-        noteDOM.style.animation = `${this.moveTime} ${this.timingFunction} ${this.moveAnimation}`
+        noteDOM.style.animation = `${this.moveTime}ms ${this.timingFunction} ${this.moveAnimation}`
 
         noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${this.fadeTime} ${this.timingFunction} ${this.fadeAnimation}`
+            noteDOM.style.animation = `${this.fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`
             noteDOM.addEventListener('animationend', () => {
                 noteDOM.remove()
             })
@@ -174,8 +174,8 @@ class Game {
     public readonly judgements: Judgements
     public readonly maxScore: number
 
-    public play(song: Song, speed = 1000) {
-        console.log(`${song.info.title} start with speed ${speed}ms`)
+    public play(song: Song) {
+        console.log(`${song.info.title} start`)
     }
 
     public constructor({

@@ -5,6 +5,7 @@
   "main": "dist/rhy-game.js",
   "scripts": {
     "build": "tsc -p .",
+    "dev": "tsc ./lib/rhygame.ts .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
