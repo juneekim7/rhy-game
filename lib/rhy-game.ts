@@ -14,27 +14,23 @@ class Judgement {
 interface NoteParams {
     className?: string
     moveAnimation?: string
-    moveTime?: number
     fadeAnimation?: string
-    fadeTime?: number
     timingFunction?: string
 }
 
 abstract class Note {
     public className = 'note'
     public moveAnimation = 'note-move'
-    public moveTime = 1000
     public fadeAnimation = 'note-fade'
-    public fadeTime = 100
     public timingFunction = 'linear'
 
-    public createDOM(laneDOM: HTMLBodyElement) {
+    public createDOM(laneDOM: HTMLBodyElement, moveTime: number, fadeTime: number) {
         const noteDOM = document.createElement('div')
         noteDOM.setAttribute('class', this.className)
-        noteDOM.style.animation = `${this.moveTime}ms ${this.timingFunction} ${this.moveAnimation}`
+        noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`
 
         noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${this.fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`
+            noteDOM.style.animation = `${fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`
             noteDOM.addEventListener('animationend', () => {
                 noteDOM.remove()
             })
@@ -46,16 +42,12 @@ abstract class Note {
     public constructor({
         className = undefined,
         moveAnimation = undefined,
-        moveTime = undefined,
         fadeAnimation = undefined,
-        fadeTime = undefined,
         timingFunction = undefined
     }: NoteParams = {}) {
         if (className) this.className = className
         if (moveAnimation) this.moveAnimation = moveAnimation
-        if (moveTime) this.moveTime = moveTime
         if (fadeAnimation) this.fadeAnimation = fadeAnimation
-        if (fadeTime) this.fadeTime = fadeTime
         if (timingFunction) this.timingFunction = timingFunction
     }
 }
@@ -75,17 +67,9 @@ class Long extends Note {
 // #endregion
 
 // #region basic mobile note
-class Tap extends Normal {
-    public className = 'tap'
-    public moveAnimation = 'tap-move'
-    public fadeAnimation = 'tap-fade'
-}
+class Tap extends Normal {}
 
-class Hold extends Long {
-    public className = 'hold'
-    public moveAnimation = 'hold-move'
-    public fadeAnimation = 'hold-fade'
-}
+class Hold extends Long {}
 // #endregion
 
 // #region advanced note
@@ -115,7 +99,7 @@ class Info {
     public readonly title: string
     public readonly artist: string
 
-    public readonly level: number
+    public readonly difficulty: number
     public readonly bpm: number
     public readonly split: number
 
@@ -127,7 +111,7 @@ class Info {
         this.title = info.title
         this.artist = info.artist
 
-        this.level = info.level
+        this.difficulty = info.difficulty
         this.bpm = info.bpm
         this.split = info.split
 
@@ -137,21 +121,23 @@ class Info {
 }
 
 interface Chart {
-    [mode: string]: []
+    [mode: string]: Record<string, string>[]
 }
 
 interface SongParams {
     info: Info,
-    chart: Chart
+    charts: Chart
 }
 
 class Song {
     public readonly info: Info
-    public readonly chart: Chart
+    public readonly charts: {
+        [mode: string]: Record<string, string>[]
+    }
 
-    public constructor({ info, chart }: SongParams) {
+    public constructor({ info, charts }: SongParams) {
         this.info = info,
-        this.chart = chart
+        this.charts = charts
     }
 }
 // #endregion
@@ -160,21 +146,70 @@ class Song {
 type DOM = Record<string, HTMLBodyElement>
 type Notes = Record<string, () => Note>
 type Judgements = Judgement[]
+interface Time {
+    move: number
+    fade: number
+    delay: number
+}
 
 interface GameParams {
     DOM?: DOM
     notes?: Notes
     judgements?: Judgements
     maxScore?: number
+    time?: Time
 }
 
 class Game {
-    public readonly DOM: DOM
-    public readonly notes: Notes
-    public readonly judgements: Judgements
-    public readonly maxScore: number
+    public DOM: DOM
+    public notes: Notes
+    public judgements: Judgements
+    public maxScore: number
+    public time: Time
 
-    public play(song: Song) {
+    private loadNote(song: Song, mode: string) {
+        if (!(mode in song.charts)) {
+            throw new Error(`there is no mode ${mode} in the song ${song.info.title}`)
+        }
+        if (song.charts[mode].length === 0) {
+            throw new Error(`there is no information in the mode ${mode} of the song ${song.info.title}`)
+        }
+
+        const chart: Record<string, string> = {}
+        for (const group of song.charts[mode]) {
+            for (const laneName in group) {
+                if (!(laneName in this.DOM)) continue
+                if (! chart[laneName]) chart[laneName] = ''
+                chart[laneName] += group[laneName].replace(/\|/g, '')
+            }
+        }
+
+        let index = 0
+        setInterval(() => {
+            for (const laneName in chart) {
+                const lane = chart[laneName]
+                if (index === lane.length) return
+
+                const noteChar = lane[index]
+                if (noteChar in this.notes) {
+                    const note = this.notes[noteChar]()
+                    note.createDOM(this.DOM[laneName], this.time.move, this.time.fade)
+                }
+            }
+            index++
+        }, 240000 / song.info.bpm / song.info.split)
+    }
+
+    public play(song: Song, mode: string) {
+        const music = new Audio(song.info.music)
+
+        setTimeout(() => {
+            this.loadNote(song, mode)
+        }, 0)
+        setTimeout(() => {
+            music.play()
+        }, this.time.move + this.time.delay)
+
         console.log(`${song.info.title} start`)
     }
 
@@ -193,12 +228,18 @@ class Game {
             new Judgement('great', 100, true),
             new Judgement('bad', 500, false)
         ],
-        maxScore = 100000
+        maxScore = 100000,
+        time = {
+            move: 1000,
+            fade: 100,
+            delay: 0
+        }
     }: GameParams = {}) {
         this.DOM = DOM
         this.notes = notes
         this.judgements = judgements
         this.maxScore = maxScore
+        this.time = time
     }
 }
 // #endregion

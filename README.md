@@ -57,13 +57,7 @@ const myRhythmGame = new Game({
         combo: document.getElementById('combo'),
         judgement: document.getElementById('judgement'),
         score: document.getElementById('score')
-    },
-    notes: {
-        // x: () => new NoteType(noteCLassName, moveAnimationName, moveTime in ms, fadeAnimationName, fadeTime) 
-        n: () => new Normal('normal', 'normal-move', 1000, 'normal-fade', 100),
-        l: () => new Long('long', 'long-move', 1000, 'long-fade', 100)
     }
-    maxScore: 100000
 })
 ```
 

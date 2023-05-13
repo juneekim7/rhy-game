@@ -12,33 +12,27 @@ class Judgement {
 class Note {
     className = 'note';
     moveAnimation = 'note-move';
-    moveTime = 1000;
     fadeAnimation = 'note-fade';
-    fadeTime = 100;
     timingFunction = 'linear';
-    createDOM(laneDOM) {
+    createDOM(laneDOM, moveTime, fadeTime) {
         const noteDOM = document.createElement('div');
         noteDOM.setAttribute('class', this.className);
-        noteDOM.style.animation = `${this.moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
+        noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
         noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${this.fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`;
+            noteDOM.style.animation = `${fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`;
             noteDOM.addEventListener('animationend', () => {
                 noteDOM.remove();
             });
         });
         laneDOM.appendChild(noteDOM);
     }
-    constructor({ className = undefined, moveAnimation = undefined, moveTime = undefined, fadeAnimation = undefined, fadeTime = undefined, timingFunction = undefined } = {}) {
+    constructor({ className = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined } = {}) {
         if (className)
             this.className = className;
         if (moveAnimation)
             this.moveAnimation = moveAnimation;
-        if (moveTime)
-            this.moveTime = moveTime;
         if (fadeAnimation)
             this.fadeAnimation = fadeAnimation;
-        if (fadeTime)
-            this.fadeTime = fadeTime;
         if (timingFunction)
             this.timingFunction = timingFunction;
     }
@@ -57,14 +51,8 @@ class Long extends Note {
 // #endregion
 // #region basic mobile note
 class Tap extends Normal {
-    className = 'tap';
-    moveAnimation = 'tap-move';
-    fadeAnimation = 'tap-fade';
 }
 class Hold extends Long {
-    className = 'hold';
-    moveAnimation = 'hold-move';
-    fadeAnimation = 'hold-fade';
 }
 // #endregion
 // #region advanced note
@@ -90,7 +78,7 @@ class Info {
     music;
     title;
     artist;
-    level;
+    difficulty;
     bpm;
     split;
     cover;
@@ -99,7 +87,7 @@ class Info {
         this.music = info.music;
         this.title = info.title;
         this.artist = info.artist;
-        this.level = info.level;
+        this.difficulty = info.difficulty;
         this.bpm = info.bpm;
         this.split = info.split;
         this.cover = info.cover;
@@ -108,10 +96,10 @@ class Info {
 }
 class Song {
     info;
-    chart;
-    constructor({ info, chart }) {
+    charts;
+    constructor({ info, charts }) {
         this.info = info,
-            this.chart = chart;
+            this.charts = charts;
     }
 }
 class Game {
@@ -119,7 +107,47 @@ class Game {
     notes;
     judgements;
     maxScore;
-    play(song) {
+    time;
+    loadNote(song, mode) {
+        if (!(mode in song.charts)) {
+            throw new Error(`there is no mode ${mode} in the song ${song.info.title}`);
+        }
+        if (song.charts[mode].length === 0) {
+            throw new Error(`there is no information in the mode ${mode} of the song ${song.info.title}`);
+        }
+        const chart = {};
+        for (const group of song.charts[mode]) {
+            for (const laneName in group) {
+                if (!(laneName in this.DOM))
+                    continue;
+                if (!chart[laneName])
+                    chart[laneName] = '';
+                chart[laneName] += group[laneName].replace(/\|/g, '');
+            }
+        }
+        let index = 0;
+        setInterval(() => {
+            for (const laneName in chart) {
+                const lane = chart[laneName];
+                if (index === lane.length)
+                    return;
+                const noteChar = lane[index];
+                if (noteChar in this.notes) {
+                    const note = this.notes[noteChar]();
+                    note.createDOM(this.DOM[laneName], this.time.move, this.time.fade);
+                }
+            }
+            index++;
+        }, 240000 / song.info.bpm / song.info.split);
+    }
+    play(song, mode) {
+        const music = new Audio(song.info.music);
+        setTimeout(() => {
+            this.loadNote(song, mode);
+        }, 0);
+        setTimeout(() => {
+            music.play();
+        }, this.time.move + this.time.delay);
         console.log(`${song.info.title} start`);
     }
     constructor({ DOM = {}, notes = {
@@ -133,11 +161,16 @@ class Game {
         new Judgement('great', 100, true),
         new Judgement('great', 100, true),
         new Judgement('bad', 500, false)
-    ], maxScore = 100000 } = {}) {
+    ], maxScore = 100000, time = {
+        move: 1000,
+        fade: 100,
+        delay: 0
+    } } = {}) {
         this.DOM = DOM;
         this.notes = notes;
         this.judgements = judgements;
         this.maxScore = maxScore;
+        this.time = time;
     }
 }
 // #endregion

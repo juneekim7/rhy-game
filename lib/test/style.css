@@ -3,6 +3,7 @@
     padding: 0;
     
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .lane {
@@ -12,9 +13,11 @@
 }
 
 .normal {
-    width: 25vh;
+    width: 5vh;
     height: 25vh;
     background-color: blue;
+
+    position: absolute;
 }
 
 @keyframes normal-move {
@@ -23,6 +26,10 @@
 }
 
 @keyframes normal-fade {
-    0% { width: 25vh; }
+    0% { width: 5vh; }
     100% { width: 0vh; }
+}
+
+.long {
+    
 }
