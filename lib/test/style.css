@@ -15,8 +15,6 @@
     width: 25vh;
     height: 25vh;
     background-color: blue;
-
-    animation: 20ms linear normal-move;
 }
 
 @keyframes normal-move {
