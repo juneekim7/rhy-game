@@ -16,21 +16,23 @@ interface NoteParams {
     moveAnimation?: string
     fadeAnimation?: string
     timingFunction?: string
+    sizeRatio?: number
 }
 
 abstract class Note {
     public className = 'note'
-    public moveAnimation = 'note-move'
+    public moveAnimation = 'move'
     public fadeAnimation = 'note-fade'
     public timingFunction = 'linear'
+    public sizeRatio = 1
 
-    public createDOM(laneDOM: HTMLBodyElement, moveTime: number, fadeTime: number) {
+    public createDOM(laneDOM: HTMLBodyElement, moveTime: number) {
         const noteDOM = document.createElement('div')
         noteDOM.setAttribute('class', this.className)
         noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`
 
         noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`
+            noteDOM.style.animation = `${moveTime * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`
             noteDOM.addEventListener('animationend', () => {
                 noteDOM.remove()
             })
@@ -43,26 +45,28 @@ abstract class Note {
         className = undefined,
         moveAnimation = undefined,
         fadeAnimation = undefined,
-        timingFunction = undefined
+        timingFunction = undefined,
+        sizeRatio
     }: NoteParams = {}) {
         if (className) this.className = className
         if (moveAnimation) this.moveAnimation = moveAnimation
         if (fadeAnimation) this.fadeAnimation = fadeAnimation
         if (timingFunction) this.timingFunction = timingFunction
+        if (sizeRatio) this.sizeRatio = sizeRatio
     }
 }
 
 // #region basic note
 class Normal extends Note {
     public className = 'normal'
-    public moveAnimation = 'normal-move'
     public fadeAnimation = 'normal-fade'
+    public sizeRatio = 0.1
 }
 
 class Long extends Note {
     public className = 'long'
-    public moveAnimation = 'long-move'
     public fadeAnimation = 'long-fade'
+    public sizeRatio = 1
 }
 // #endregion
 
@@ -75,20 +79,14 @@ class Hold extends Long {}
 // #region advanced note
 class Drag extends Tap {
     public className = 'drag'
-    public moveAnimation = 'drag-move'
-    public fadeAnimation = 'drag-fade'
 }
 
 class Flick extends Tap {
     public className = 'flick'
-    public moveAnimation = 'flick-move'
-    public fadeAnimation = 'flick-fade'
 }
 
 class LongFlick extends Hold {
     public className = 'long-flick'
-    public moveAnimation = 'long-flick-move'
-    public fadeAnimation = 'long-flick-fade'
 }
 // #endregion
 // #endregion
@@ -148,7 +146,6 @@ type Notes = Record<string, () => Note>
 type Judgements = Judgement[]
 interface Time {
     move: number
-    fade: number
     delay: number
 }
 
@@ -193,7 +190,7 @@ class Game {
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar]()
-                    note.createDOM(this.DOM[laneName], this.time.move, this.time.fade)
+                    note.createDOM(this.DOM[laneName], this.time.move)
                 }
             }
             index++
@@ -231,7 +228,6 @@ class Game {
         maxScore = 100000,
         time = {
             move: 1000,
-            fade: 100,
             delay: 0
         }
     }: GameParams = {}) {

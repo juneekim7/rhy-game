@@ -20,7 +20,7 @@
     position: absolute;
 }
 
-@keyframes normal-move {
+@keyframes move {
     0% { transform: translateX(100vw); }
     100% { transform: translateX(0vw); }
 }
