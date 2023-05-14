@@ -137,7 +137,7 @@ class Song {
     }
 
     public constructor({ info, charts }: SongParams) {
-        this.info = info,
+        this.info = new Info(info),
         this.charts = charts
     }
 }
@@ -147,17 +147,13 @@ class Song {
 type DOM = Record<string, HTMLBodyElement>
 type Notes = Record<string, () => Note>
 type Judgements = Judgement[]
-interface Time {
-    move: number
-    delay: number
-}
 
 interface GameParams {
     DOM?: DOM
     notes?: Notes
     judgements?: Judgements
     maxScore?: number
-    time?: Time
+    delay?: number
     sizePerBeat?: number | string
     laneSizeRatio?: number
 }
@@ -167,7 +163,7 @@ class Game {
     public notes: Notes
     public judgements: Judgements
     public maxScore: number
-    public time: Time
+    public delay: number
     public sizePerBeat: string
     #laneSizeRatio: number
 
@@ -198,6 +194,8 @@ class Game {
         }
 
         let index = 0
+        const moveTime = song.info.timePerBeat * this.laneSizeRatio
+        console.log(song.info.timePerBeat)
         setInterval(() => {
             for (const laneName in chart) {
                 const lane = chart[laneName]
@@ -206,7 +204,7 @@ class Game {
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar]()
-                    note.createDOM(this.DOM[laneName], this.time.move, this.sizePerBeat, this.laneSizeRatio)
+                    note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
                 }
             }
             index++
@@ -215,13 +213,14 @@ class Game {
 
     public play(song: Song, mode: string) {
         const music = new Audio(song.info.music)
+        const moveTime = song.info.timePerBeat * this.laneSizeRatio
 
         setTimeout(() => {
             this.loadNote(song, mode)
         }, 0)
         setTimeout(() => {
             music.play()
-        }, this.time.move + this.time.delay)
+        }, moveTime + this.delay)
 
         console.log(`${song.info.title} start`)
     }
@@ -242,10 +241,7 @@ class Game {
             new Judgement('bad', 500, false)
         ],
         maxScore = 100000,
-        time = {
-            move: 1000,
-            delay: 0
-        },
+        delay = 0,
         sizePerBeat = '100px',
         laneSizeRatio = 8
     }: GameParams = {}) {
@@ -253,7 +249,7 @@ class Game {
         this.notes = notes
         this.judgements = judgements
         this.maxScore = maxScore
-        this.time = time
+        this.delay = delay
         if (typeof sizePerBeat === 'number') sizePerBeat = sizePerBeat + 'px'
         this.sizePerBeat = sizePerBeat
         this.#laneSizeRatio = laneSizeRatio

@@ -97,7 +97,7 @@ class Song {
     info;
     charts;
     constructor({ info, charts }) {
-        this.info = info,
+        this.info = new Info(info),
             this.charts = charts;
     }
 }
@@ -106,7 +106,7 @@ class Game {
     notes;
     judgements;
     maxScore;
-    time;
+    delay;
     sizePerBeat;
     #laneSizeRatio;
     set laneSizeRatio(ratio) {
@@ -134,6 +134,8 @@ class Game {
             }
         }
         let index = 0;
+        const moveTime = song.info.timePerBeat * this.laneSizeRatio;
+        console.log(song.info.timePerBeat);
         setInterval(() => {
             for (const laneName in chart) {
                 const lane = chart[laneName];
@@ -142,7 +144,7 @@ class Game {
                 const noteChar = lane[index];
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar]();
-                    note.createDOM(this.DOM[laneName], this.time.move, this.sizePerBeat, this.laneSizeRatio);
+                    note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio);
                 }
             }
             index++;
@@ -150,12 +152,13 @@ class Game {
     }
     play(song, mode) {
         const music = new Audio(song.info.music);
+        const moveTime = song.info.timePerBeat * this.laneSizeRatio;
         setTimeout(() => {
             this.loadNote(song, mode);
         }, 0);
         setTimeout(() => {
             music.play();
-        }, this.time.move + this.time.delay);
+        }, moveTime + this.delay);
         console.log(`${song.info.title} start`);
     }
     constructor({ DOM = {}, notes = {
@@ -169,15 +172,12 @@ class Game {
         new Judgement('great', 100, true),
         new Judgement('great', 100, true),
         new Judgement('bad', 500, false)
-    ], maxScore = 100000, time = {
-        move: 1000,
-        delay: 0
-    }, sizePerBeat = '100px', laneSizeRatio = 8 } = {}) {
+    ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8 } = {}) {
         this.DOM = DOM;
         this.notes = notes;
         this.judgements = judgements;
         this.maxScore = maxScore;
-        this.time = time;
+        this.delay = delay;
         if (typeof sizePerBeat === 'number')
             sizePerBeat = sizePerBeat + 'px';
         this.sizePerBeat = sizePerBeat;
