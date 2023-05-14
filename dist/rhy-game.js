@@ -10,11 +10,11 @@ class Judgement {
     }
 }
 class Note {
-    classNames = ['note'];
-    moveAnimation = 'move';
-    fadeAnimation = 'fade';
-    timingFunction = 'linear';
-    sizeRatio = 0.1;
+    classNames;
+    moveAnimation;
+    fadeAnimation;
+    timingFunction;
+    sizeRatio;
     createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
         if (this.sizeRatio === 0)
             return;
@@ -33,28 +33,30 @@ class Note {
         });
         laneDOM.appendChild(noteDOM);
     }
-    constructor(lane, index, { classNames = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined, sizeRatio } = {}) {
-        if (classNames)
-            this.classNames = classNames;
-        if (moveAnimation)
-            this.moveAnimation = moveAnimation;
-        if (fadeAnimation)
-            this.fadeAnimation = fadeAnimation;
-        if (timingFunction)
-            this.timingFunction = timingFunction;
-        if (sizeRatio)
-            this.sizeRatio = sizeRatio;
+    constructor(lane, index, { classNames = ['note'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        this.classNames = classNames;
+        this.moveAnimation = moveAnimation;
+        this.fadeAnimation = fadeAnimation;
+        this.timingFunction = timingFunction;
+        this.sizeRatio = sizeRatio;
     }
 }
 // #region basic note
 class Normal extends Note {
-    classNames = ['note', 'normal'];
-    sizeRatio = 0.1;
+    constructor(lane, index, { classNames = ['note', 'normal'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+    }
 }
 class Long extends Note {
     classNames = ['note', 'long'];
     sizeRatio = 1;
-    constructor(lane, index, { classNames = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined, sizeRatio } = {}) {
+    constructor(lane, index, { classNames = ['note', 'long'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 1 } = {}) {
         super(lane, index, {
             classNames,
             moveAnimation,
@@ -75,21 +77,61 @@ class Long extends Note {
 // #endregion
 // #region basic mobile note
 class Tap extends Normal {
-    classNames = ['note', 'normal', 'tap'];
+    constructor(lane, index, { classNames = ['note', 'normal', 'tap'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+    }
 }
 class Hold extends Long {
-    classNames = ['note', 'long', 'hold'];
+    constructor(lane, index, { classNames = ['note', 'long', 'hold'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+    }
 }
 // #endregion
 // #region advanced note
 class Drag extends Tap {
-    classNames = ['note', 'normal', 'tap', 'drag'];
+    constructor(lane, index, { classNames = ['note', 'normal', 'tap', 'drag'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+    }
 }
 class Flick extends Tap {
-    classNames = ['note', 'normal', 'tap', 'flick'];
+    constructor(lane, index, { classNames = ['note', 'normal', 'tap', 'flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+    }
 }
 class HoldFlick extends Hold {
-    classNames = ['note', 'long', 'hold', 'hold-flick'];
+    constructor(lane, index, { classNames = ['note', 'long', 'hold', 'hold-flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+    }
 }
 // #endregion
 // #endregion

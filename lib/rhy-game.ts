@@ -20,11 +20,11 @@ interface NoteParams {
 }
 
 abstract class Note {
-    public classNames = ['note']
-    public moveAnimation = 'move'
-    public fadeAnimation = 'fade'
-    public timingFunction = 'linear'
-    public sizeRatio = 0.1
+    public classNames
+    public moveAnimation
+    public fadeAnimation
+    public timingFunction
+    public sizeRatio
 
     public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
         if (this.sizeRatio === 0) return
@@ -48,24 +48,37 @@ abstract class Note {
     }
 
     public constructor(lane: string, index: number, {
-        classNames = undefined,
-        moveAnimation = undefined,
-        fadeAnimation = undefined,
-        timingFunction = undefined,
-        sizeRatio
+        classNames = ['note'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
     }: NoteParams = {}) {
-        if (classNames) this.classNames = classNames
-        if (moveAnimation) this.moveAnimation = moveAnimation
-        if (fadeAnimation) this.fadeAnimation = fadeAnimation
-        if (timingFunction) this.timingFunction = timingFunction
-        if (sizeRatio) this.sizeRatio = sizeRatio
+        this.classNames = classNames
+        this.moveAnimation = moveAnimation
+        this.fadeAnimation = fadeAnimation
+        this.timingFunction = timingFunction
+        this.sizeRatio = sizeRatio
     }
 }
 
 // #region basic note
 class Normal extends Note {
-    public classNames = ['note', 'normal']
-    public sizeRatio = 0.1
+    public constructor(lane: string, index: number, {
+        classNames = ['note', 'normal'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
 }
 
 class Long extends Note {
@@ -73,11 +86,11 @@ class Long extends Note {
     public sizeRatio = 1
 
     public constructor(lane: string, index: number, {
-        classNames = undefined,
-        moveAnimation = undefined,
-        fadeAnimation = undefined,
-        timingFunction = undefined,
-        sizeRatio
+        classNames = ['note', 'long'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 1
     }: NoteParams = {}) {
         super(lane, index, {
             classNames,
@@ -98,25 +111,95 @@ class Long extends Note {
 
 // #region basic mobile note
 class Tap extends Normal {
-    public classNames = ['note', 'normal', 'tap']
+    public constructor(lane: string, index: number, {
+        classNames = ['note', 'normal', 'tap'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
 }
 
 class Hold extends Long {
-    public classNames = ['note', 'long', 'hold']
+    public constructor(lane: string, index: number, {
+        classNames = ['note', 'long', 'hold'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
 }
 // #endregion
 
 // #region advanced note
 class Drag extends Tap {
-    public classNames = ['note', 'normal', 'tap', 'drag']
+    public constructor(lane: string, index: number, {
+        classNames = ['note', 'normal', 'tap', 'drag'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
 }
 
 class Flick extends Tap {
-    public classNames = ['note', 'normal', 'tap', 'flick']
+    public constructor(lane: string, index: number, {
+        classNames = ['note', 'normal', 'tap', 'flick'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
 }
 
 class HoldFlick extends Hold {
-    public classNames = ['note', 'long', 'hold', 'hold-flick']
+    public constructor(lane: string, index: number, {
+        classNames = ['note', 'long', 'hold', 'hold-flick'],
+        moveAnimation = 'move',
+        fadeAnimation = 'fade',
+        timingFunction = 'linear',
+        sizeRatio = 0.1
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
 }
 // #endregion
 // #endregion
