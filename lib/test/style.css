@@ -12,20 +12,19 @@
     border: 1px solid black;
 }
 
-.normal {
+.note {
     width: var(--size);
     height: 25vh;
-    background-color: blue;
 
     position: absolute;
 }
 
-.long {
-    width: var(--size);
-    height: 25vh;
-    background-color: blue;
+.normal {
+    background-color: green;
+}
 
-    position: absolute;
+.long {
+    background-color: blue;
 }
 
 @keyframes move {

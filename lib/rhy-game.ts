@@ -12,7 +12,7 @@ class Judgement {
 
 // #region note
 interface NoteParams {
-    className?: string
+    classNames?: string[]
     moveAnimation?: string
     fadeAnimation?: string
     timingFunction?: string
@@ -20,15 +20,20 @@ interface NoteParams {
 }
 
 abstract class Note {
-    public className = 'note'
+    public classNames = ['note']
     public moveAnimation = 'move'
     public fadeAnimation = 'fade'
     public timingFunction = 'linear'
     public sizeRatio = 0.1
 
     public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
+        if (this.sizeRatio === 0) return
+
         const noteDOM = document.createElement('div')
-        noteDOM.setAttribute('class', this.className)
+        for (const className of this.classNames) {
+            const currentClass = noteDOM.getAttribute('class') ?? ''
+            noteDOM.setAttribute('class', currentClass + ' ' + className)
+        }
         noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`)
         noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`
 
@@ -42,14 +47,14 @@ abstract class Note {
         laneDOM.appendChild(noteDOM)
     }
 
-    public constructor({
-        className = undefined,
+    public constructor(lane: string, index: number, {
+        classNames = undefined,
         moveAnimation = undefined,
         fadeAnimation = undefined,
         timingFunction = undefined,
         sizeRatio
     }: NoteParams = {}) {
-        if (className) this.className = className
+        if (classNames) this.classNames = classNames
         if (moveAnimation) this.moveAnimation = moveAnimation
         if (fadeAnimation) this.fadeAnimation = fadeAnimation
         if (timingFunction) this.timingFunction = timingFunction
@@ -59,33 +64,59 @@ abstract class Note {
 
 // #region basic note
 class Normal extends Note {
-    public className = 'normal'
+    public classNames = ['note', 'normal']
     public sizeRatio = 0.1
 }
 
 class Long extends Note {
-    public className = 'long'
+    public classNames = ['note', 'long']
     public sizeRatio = 1
+
+    public constructor(lane: string, index: number, {
+        classNames = undefined,
+        moveAnimation = undefined,
+        fadeAnimation = undefined,
+        timingFunction = undefined,
+        sizeRatio
+    }: NoteParams = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+
+        const noteChar = lane[index]
+        let length = 1
+        if (index > 0 && lane[index - 1] === noteChar) length = 0
+        else while (lane[index + length] === noteChar) length++
+        this.sizeRatio = length
+    }
 }
 // #endregion
 
 // #region basic mobile note
-class Tap extends Normal {}
+class Tap extends Normal {
+    public classNames = ['note', 'normal', 'tap']
+}
 
-class Hold extends Long {}
+class Hold extends Long {
+    public classNames = ['note', 'long', 'hold']
+}
 // #endregion
 
 // #region advanced note
 class Drag extends Tap {
-    public className = 'drag'
+    public classNames = ['note', 'normal', 'tap', 'drag']
 }
 
 class Flick extends Tap {
-    public className = 'flick'
+    public classNames = ['note', 'normal', 'tap', 'flick']
 }
 
-class LongFlick extends Hold {
-    public className = 'long-flick'
+class HoldFlick extends Hold {
+    public classNames = ['note', 'long', 'hold', 'hold-flick']
 }
 // #endregion
 // #endregion
@@ -99,6 +130,7 @@ class Info {
     public readonly difficulty: number
     public readonly bpm: number
     public readonly split: number
+    public readonly delay: number
 
     public readonly cover: string
     public readonly background: string
@@ -115,6 +147,7 @@ class Info {
         this.difficulty = info.difficulty
         this.bpm = info.bpm
         this.split = info.split
+        this.delay = info.delay
 
         this.cover = info.cover
         this.background = info.background
@@ -145,7 +178,8 @@ class Song {
 
 // #region game
 type DOM = Record<string, HTMLBodyElement>
-type Notes = Record<string, () => Note>
+// eslint-disable-next-line no-unused-vars
+type Notes = Record<string, (lane: string, index: number) => Note>
 type Judgements = Judgement[]
 
 interface GameParams {
@@ -203,7 +237,7 @@ class Game {
 
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
-                    const note = this.notes[noteChar]()
+                    const note = this.notes[noteChar](lane, index)
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
                 }
             }
@@ -228,11 +262,11 @@ class Game {
     public constructor({
         DOM = {},
         notes = {
-            n: () => new Tap(),
-            l: () => new Hold(),
-            d: () => new Drag(),
-            f: () => new Flick(),
-            x: () => new LongFlick()
+            n: (lane, index) => new Tap(lane, index),
+            l: (lane, index) => new Hold(lane, index),
+            d: (lane, index) => new Drag(lane, index),
+            f: (lane, index) => new Flick(lane, index),
+            x: (lane, index) => new HoldFlick(lane, index)
         },
         judgements = [
             new Judgement('perfect', 40, true),
@@ -261,6 +295,6 @@ class Game {
 // export {
 //     Judgement,
 //     Note, Normal, Long,
-//     Tap, Hold, Drag, Flick, LongFlick,
+//     Tap, Hold, Drag, Flick, HoldFlick,
 //     Song, Game
 // }

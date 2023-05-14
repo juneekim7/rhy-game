@@ -10,14 +10,19 @@ class Judgement {
     }
 }
 class Note {
-    className = 'note';
+    classNames = ['note'];
     moveAnimation = 'move';
     fadeAnimation = 'fade';
     timingFunction = 'linear';
     sizeRatio = 0.1;
     createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
+        if (this.sizeRatio === 0)
+            return;
         const noteDOM = document.createElement('div');
-        noteDOM.setAttribute('class', this.className);
+        for (const className of this.classNames) {
+            const currentClass = noteDOM.getAttribute('class') ?? '';
+            noteDOM.setAttribute('class', currentClass + ' ' + className);
+        }
         noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`);
         noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
         noteDOM.addEventListener('animationend', () => {
@@ -28,9 +33,9 @@ class Note {
         });
         laneDOM.appendChild(noteDOM);
     }
-    constructor({ className = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined, sizeRatio } = {}) {
-        if (className)
-            this.className = className;
+    constructor(lane, index, { classNames = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined, sizeRatio } = {}) {
+        if (classNames)
+            this.classNames = classNames;
         if (moveAnimation)
             this.moveAnimation = moveAnimation;
         if (fadeAnimation)
@@ -43,29 +48,48 @@ class Note {
 }
 // #region basic note
 class Normal extends Note {
-    className = 'normal';
+    classNames = ['note', 'normal'];
     sizeRatio = 0.1;
 }
 class Long extends Note {
-    className = 'long';
+    classNames = ['note', 'long'];
     sizeRatio = 1;
+    constructor(lane, index, { classNames = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined, sizeRatio } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        });
+        const noteChar = lane[index];
+        let length = 1;
+        if (index > 0 && lane[index - 1] === noteChar)
+            length = 0;
+        else
+            while (lane[index + length] === noteChar)
+                length++;
+        this.sizeRatio = length;
+    }
 }
 // #endregion
 // #region basic mobile note
 class Tap extends Normal {
+    classNames = ['note', 'normal', 'tap'];
 }
 class Hold extends Long {
+    classNames = ['note', 'long', 'hold'];
 }
 // #endregion
 // #region advanced note
 class Drag extends Tap {
-    className = 'drag';
+    classNames = ['note', 'normal', 'tap', 'drag'];
 }
 class Flick extends Tap {
-    className = 'flick';
+    classNames = ['note', 'normal', 'tap', 'flick'];
 }
-class LongFlick extends Hold {
-    className = 'long-flick';
+class HoldFlick extends Hold {
+    classNames = ['note', 'long', 'hold', 'hold-flick'];
 }
 // #endregion
 // #endregion
@@ -77,6 +101,7 @@ class Info {
     difficulty;
     bpm;
     split;
+    delay;
     cover;
     background;
     get timePerBeat() {
@@ -89,6 +114,7 @@ class Info {
         this.difficulty = info.difficulty;
         this.bpm = info.bpm;
         this.split = info.split;
+        this.delay = info.delay;
         this.cover = info.cover;
         this.background = info.background;
     }
@@ -143,7 +169,7 @@ class Game {
                     return;
                 const noteChar = lane[index];
                 if (noteChar in this.notes) {
-                    const note = this.notes[noteChar]();
+                    const note = this.notes[noteChar](lane, index);
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio);
                 }
             }
@@ -162,11 +188,11 @@ class Game {
         console.log(`${song.info.title} start`);
     }
     constructor({ DOM = {}, notes = {
-        n: () => new Tap(),
-        l: () => new Hold(),
-        d: () => new Drag(),
-        f: () => new Flick(),
-        x: () => new LongFlick()
+        n: (lane, index) => new Tap(lane, index),
+        l: (lane, index) => new Hold(lane, index),
+        d: (lane, index) => new Drag(lane, index),
+        f: (lane, index) => new Flick(lane, index),
+        x: (lane, index) => new HoldFlick(lane, index)
     }, judgements = [
         new Judgement('perfect', 40, true),
         new Judgement('great', 100, true),
@@ -189,6 +215,6 @@ class Game {
 // export {
 //     Judgement,
 //     Note, Normal, Long,
-//     Tap, Hold, Drag, Flick, LongFlick,
+//     Tap, Hold, Drag, Flick, HoldFlick,
 //     Song, Game
 // }
