@@ -22,17 +22,18 @@ interface NoteParams {
 abstract class Note {
     public className = 'note'
     public moveAnimation = 'move'
-    public fadeAnimation = 'note-fade'
+    public fadeAnimation = 'fade'
     public timingFunction = 'linear'
-    public sizeRatio = 1
+    public sizeRatio = 0.1
 
-    public createDOM(laneDOM: HTMLBodyElement, moveTime: number) {
+    public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
         const noteDOM = document.createElement('div')
         noteDOM.setAttribute('class', this.className)
+        noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`)
         noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`
 
         noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${moveTime * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`
+            noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`
             noteDOM.addEventListener('animationend', () => {
                 noteDOM.remove()
             })
@@ -59,13 +60,11 @@ abstract class Note {
 // #region basic note
 class Normal extends Note {
     public className = 'normal'
-    public fadeAnimation = 'normal-fade'
     public sizeRatio = 0.1
 }
 
 class Long extends Note {
     public className = 'long'
-    public fadeAnimation = 'long-fade'
     public sizeRatio = 1
 }
 // #endregion
@@ -103,6 +102,10 @@ class Info {
 
     public readonly cover: string
     public readonly background: string
+
+    public get timePerBeat() {
+        return 240000 / this.bpm / this.split
+    }
 
     public constructor(info: Info) {
         this.music = info.music
@@ -155,6 +158,8 @@ interface GameParams {
     judgements?: Judgements
     maxScore?: number
     time?: Time
+    sizePerBeat?: number | string
+    laneSizeRatio?: number
 }
 
 class Game {
@@ -163,6 +168,17 @@ class Game {
     public judgements: Judgements
     public maxScore: number
     public time: Time
+    public sizePerBeat: string
+    #laneSizeRatio: number
+
+    public set laneSizeRatio(ratio: number) {
+        this.#laneSizeRatio = ratio
+        document.documentElement.style.setProperty('--lane-size', `calc(${this.sizePerBeat} * ${ratio})`)
+    }
+
+    public get laneSizeRatio() {
+        return this.#laneSizeRatio
+    }
 
     private loadNote(song: Song, mode: string) {
         if (!(mode in song.charts)) {
@@ -190,11 +206,11 @@ class Game {
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar]()
-                    note.createDOM(this.DOM[laneName], this.time.move)
+                    note.createDOM(this.DOM[laneName], this.time.move, this.sizePerBeat, this.laneSizeRatio)
                 }
             }
             index++
-        }, 240000 / song.info.bpm / song.info.split)
+        }, song.info.timePerBeat)
     }
 
     public play(song: Song, mode: string) {
@@ -229,13 +245,19 @@ class Game {
         time = {
             move: 1000,
             delay: 0
-        }
+        },
+        sizePerBeat = '100px',
+        laneSizeRatio = 8
     }: GameParams = {}) {
         this.DOM = DOM
         this.notes = notes
         this.judgements = judgements
         this.maxScore = maxScore
         this.time = time
+        if (typeof sizePerBeat === 'number') sizePerBeat = sizePerBeat + 'px'
+        this.sizePerBeat = sizePerBeat
+        this.#laneSizeRatio = laneSizeRatio
+        this.laneSizeRatio = laneSizeRatio
     }
 }
 // #endregion

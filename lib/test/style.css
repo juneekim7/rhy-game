@@ -7,13 +7,21 @@
 }
 
 .lane {
-    width: 100vw;
+    width: var(--lane-size);
     height: 25vh;
     border: 1px solid black;
 }
 
 .normal {
-    width: 5vh;
+    width: var(--size);
+    height: 25vh;
+    background-color: blue;
+
+    position: absolute;
+}
+
+.long {
+    width: var(--size);
     height: 25vh;
     background-color: blue;
 
@@ -21,15 +29,11 @@
 }
 
 @keyframes move {
-    0% { transform: translateX(100vw); }
+    0% { transform: translateX(var(--lane-size)); }
     100% { transform: translateX(0vw); }
 }
 
-@keyframes normal-fade {
-    0% { width: 5vh; }
+@keyframes fade {
+    0% { width: var(--size); }
     100% { width: 0vh; }
-}
-
-.long {
-    
 }

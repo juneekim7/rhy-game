@@ -2,9 +2,10 @@
 
 class 에서
 1. 데이터
-2. private pure function
-3. private action function
-4. public pure function
-5. public action function
-6. constructor
+2. setter, getter
+3. private pure function
+4. private action function
+5. public pure function
+6. public action function
+7. constructor
 순으로 작성

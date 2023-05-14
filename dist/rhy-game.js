@@ -11,22 +11,24 @@ class Judgement {
 }
 class Note {
     className = 'note';
-    moveAnimation = 'note-move';
-    fadeAnimation = 'note-fade';
+    moveAnimation = 'move';
+    fadeAnimation = 'fade';
     timingFunction = 'linear';
-    createDOM(laneDOM, moveTime, fadeTime) {
+    sizeRatio = 0.1;
+    createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
         const noteDOM = document.createElement('div');
         noteDOM.setAttribute('class', this.className);
+        noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`);
         noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
         noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${fadeTime}ms ${this.timingFunction} ${this.fadeAnimation}`;
+            noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
             noteDOM.addEventListener('animationend', () => {
                 noteDOM.remove();
             });
         });
         laneDOM.appendChild(noteDOM);
     }
-    constructor({ className = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined } = {}) {
+    constructor({ className = undefined, moveAnimation = undefined, fadeAnimation = undefined, timingFunction = undefined, sizeRatio } = {}) {
         if (className)
             this.className = className;
         if (moveAnimation)
@@ -35,18 +37,18 @@ class Note {
             this.fadeAnimation = fadeAnimation;
         if (timingFunction)
             this.timingFunction = timingFunction;
+        if (sizeRatio)
+            this.sizeRatio = sizeRatio;
     }
 }
 // #region basic note
 class Normal extends Note {
     className = 'normal';
-    moveAnimation = 'normal-move';
-    fadeAnimation = 'normal-fade';
+    sizeRatio = 0.1;
 }
 class Long extends Note {
     className = 'long';
-    moveAnimation = 'long-move';
-    fadeAnimation = 'long-fade';
+    sizeRatio = 1;
 }
 // #endregion
 // #region basic mobile note
@@ -58,18 +60,12 @@ class Hold extends Long {
 // #region advanced note
 class Drag extends Tap {
     className = 'drag';
-    moveAnimation = 'drag-move';
-    fadeAnimation = 'drag-fade';
 }
 class Flick extends Tap {
     className = 'flick';
-    moveAnimation = 'flick-move';
-    fadeAnimation = 'flick-fade';
 }
 class LongFlick extends Hold {
     className = 'long-flick';
-    moveAnimation = 'long-flick-move';
-    fadeAnimation = 'long-flick-fade';
 }
 // #endregion
 // #endregion
@@ -83,6 +79,9 @@ class Info {
     split;
     cover;
     background;
+    get timePerBeat() {
+        return 240000 / this.bpm / this.split;
+    }
     constructor(info) {
         this.music = info.music;
         this.title = info.title;
@@ -108,6 +107,15 @@ class Game {
     judgements;
     maxScore;
     time;
+    sizePerBeat;
+    #laneSizeRatio;
+    set laneSizeRatio(ratio) {
+        this.#laneSizeRatio = ratio;
+        document.documentElement.style.setProperty('--lane-size', `calc(${this.sizePerBeat} * ${ratio})`);
+    }
+    get laneSizeRatio() {
+        return this.#laneSizeRatio;
+    }
     loadNote(song, mode) {
         if (!(mode in song.charts)) {
             throw new Error(`there is no mode ${mode} in the song ${song.info.title}`);
@@ -134,11 +142,11 @@ class Game {
                 const noteChar = lane[index];
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar]();
-                    note.createDOM(this.DOM[laneName], this.time.move, this.time.fade);
+                    note.createDOM(this.DOM[laneName], this.time.move, this.sizePerBeat, this.laneSizeRatio);
                 }
             }
             index++;
-        }, 240000 / song.info.bpm / song.info.split);
+        }, song.info.timePerBeat);
     }
     play(song, mode) {
         const music = new Audio(song.info.music);
@@ -163,14 +171,18 @@ class Game {
         new Judgement('bad', 500, false)
     ], maxScore = 100000, time = {
         move: 1000,
-        fade: 100,
         delay: 0
-    } } = {}) {
+    }, sizePerBeat = '100px', laneSizeRatio = 8 } = {}) {
         this.DOM = DOM;
         this.notes = notes;
         this.judgements = judgements;
         this.maxScore = maxScore;
         this.time = time;
+        if (typeof sizePerBeat === 'number')
+            sizePerBeat = sizePerBeat + 'px';
+        this.sizePerBeat = sizePerBeat;
+        this.#laneSizeRatio = laneSizeRatio;
+        this.laneSizeRatio = laneSizeRatio;
     }
 }
 // #endregion
