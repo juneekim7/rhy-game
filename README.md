@@ -1,4 +1,4 @@
-# rhy-game
+# rhy-game (incomplete project)
 
 ## Translation
 
