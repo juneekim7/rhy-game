@@ -69,10 +69,13 @@ const myOwnSong = new Song({
         music: './music/song.mp3',
         title: 'music title',
         artist: 'artist',
-
-        level: 5,
+        
         bpm: 120,
         split: 16,
+        difficulty: {
+            easy: 3,
+            hard: 5
+        },
 
         cover: './cover/img.png',
         background: './background/img.png'
@@ -113,14 +116,37 @@ const myOwnSong = new Song({
 #### Play Game
 
 ```js
-myRhythmGame.play(myOwnSong, 'easy')
+myRhythmGame.play(myOwnSong, 'hard' /* or 'easy'*/)
 ```
 
 ### Advanced
 
 #### Custom judgements and scores
 
+```js
+const myRhythmGame = new Game({
+    DOM: { ... },
+    judgement: {
+        amazing: new Judgement(50, true),
+        wow: new Judgement(100, true),
+        umm: new Judgement(500, false)
+    },
+    maxScore: 1000
+})
+```
+
 #### Custom notes
+
+```js
+class myOwnNote extends Note {
+    constructor(, , {
+        classNames = ['note'],
+        animationName = []
+    }) {
+      
+    }
+}
+```
 
 ### Design Tips
 
