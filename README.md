@@ -118,11 +118,13 @@ myRhythmGame.play(myOwnSong, 'easy')
 
 ### Advanced
 
-#### Custom judgements
+#### Custom judgements and scores
 
 #### Custom notes
 
-#### Design tips
+### Design Tips
+
+#### use transition to use GPU
 
 ### Examples
 
