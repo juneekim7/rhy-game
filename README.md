@@ -126,11 +126,13 @@ myRhythmGame.play(myOwnSong, 'hard' /* or 'easy'*/)
 ```js
 const myRhythmGame = new Game({
     DOM: { ... },
-    judgement: {
-        amazing: new Judgement(50, true),
-        wow: new Judgement(100, true),
-        umm: new Judgement(500, false)
-    },
+    judgements: [
+        // new Judgement(name, time, isCombo)
+        new Judgement('amazing', 50, true),
+        new Judgement('wow', 100, true),
+        new Judgement('umm', 50, false)
+        // miss is automatically generated
+    ],
     maxScore: 1000
 })
 ```
@@ -138,12 +140,21 @@ const myRhythmGame = new Game({
 #### Custom notes
 
 ```js
-class myOwnNote extends Note {
-    constructor(, , {
-        classNames = ['note'],
-        animationName = []
-    }) {
-      
+class FlickDown extends Flick {
+    constructor(lane, index, {
+        classNames = ['note', 'normal', 'tap', 'flick', 'up'],
+        moveAnimation = 'flickMove',
+        fadeAnimation = 'flickFade',
+        timingFunction = 'linear',
+        sizeRatio = 0.2
+    } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
     }
 }
 ```
