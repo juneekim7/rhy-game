@@ -210,7 +210,7 @@ class Info {
     public readonly title: string
     public readonly artist: string
 
-    public readonly difficulty: number
+    public readonly difficulty: Record<string, number>
     public readonly bpm: number
     public readonly split: number
     public readonly delay: number
