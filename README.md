@@ -116,7 +116,7 @@ const myOwnSong = new Song({
 #### Play Game
 
 ```js
-myRhythmGame.play(myOwnSong, 'hard' /* or 'easy'*/)
+myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */)
 ```
 
 ### Advanced

@@ -163,10 +163,10 @@ class Info {
 }
 class Song {
     info;
-    charts;
-    constructor({ info, charts }) {
+    chart;
+    constructor({ info, chart }) {
         this.info = new Info(info),
-            this.charts = charts;
+            this.chart = chart;
     }
 }
 class Game {
@@ -185,14 +185,14 @@ class Game {
         return this.#laneSizeRatio;
     }
     loadNote(song, mode) {
-        if (!(mode in song.charts)) {
+        if (!(mode in song.chart)) {
             throw new Error(`there is no mode ${mode} in the song ${song.info.title}`);
         }
-        if (song.charts[mode].length === 0) {
+        if (song.chart[mode].length === 0) {
             throw new Error(`there is no information in the mode ${mode} of the song ${song.info.title}`);
         }
         const chart = {};
-        for (const group of song.charts[mode]) {
+        for (const group of song.chart[mode]) {
             for (const laneName in group) {
                 if (!(laneName in this.DOM))
                     continue;

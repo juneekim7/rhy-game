@@ -243,18 +243,18 @@ interface Chart {
 
 interface SongParams {
     info: Info,
-    charts: Chart
+    chart: Chart
 }
 
 class Song {
     public readonly info: Info
-    public readonly charts: {
+    public readonly chart: {
         [mode: string]: Record<string, string>[]
     }
 
-    public constructor({ info, charts }: SongParams) {
+    public constructor({ info, chart }: SongParams) {
         this.info = new Info(info),
-        this.charts = charts
+        this.chart = chart
     }
 }
 // #endregion
@@ -294,15 +294,15 @@ class Game {
     }
 
     private loadNote(song: Song, mode: string) {
-        if (!(mode in song.charts)) {
+        if (!(mode in song.chart)) {
             throw new Error(`there is no mode ${mode} in the song ${song.info.title}`)
         }
-        if (song.charts[mode].length === 0) {
+        if (song.chart[mode].length === 0) {
             throw new Error(`there is no information in the mode ${mode} of the song ${song.info.title}`)
         }
 
         const chart: Record<string, string> = {}
-        for (const group of song.charts[mode]) {
+        for (const group of song.chart[mode]) {
             for (const laneName in group) {
                 if (!(laneName in this.DOM)) continue
                 if (! chart[laneName]) chart[laneName] = ''
