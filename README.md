@@ -130,5 +130,7 @@ myRhythmGame.play(myOwnSong, 'easy')
 
 ### License
 
+For inquiries, please contact juneekim7@gmail.com
+
 Copyright (c) 2023 준이 (Junee, juneekim7)\
 Released under the [MIT License](./LICENSE).
