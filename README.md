@@ -69,10 +69,13 @@ const myOwnSong = new Song({
         music: './music/song.mp3',
         title: 'music title',
         artist: 'artist',
-
-        level: 5,
+        
         bpm: 120,
         split: 16,
+        difficulty: {
+            easy: 3,
+            hard: 5
+        },
 
         cover: './cover/img.png',
         background: './background/img.png'
@@ -113,20 +116,58 @@ const myOwnSong = new Song({
 #### Play Game
 
 ```js
-myRhythmGame.play(myOwnSong, 'easy')
+myRhythmGame.play(myOwnSong, 'hard' /* or 'easy'*/)
 ```
 
 ### Advanced
 
-#### Custom judgements
+#### Custom judgements and scores
+
+```js
+const myRhythmGame = new Game({
+    DOM: { ... },
+    judgements: [
+        // new Judgement(name, time, isCombo)
+        new Judgement('amazing', 50, true),
+        new Judgement('wow', 100, true),
+        new Judgement('umm', 50, false)
+        // miss is automatically generated
+    ],
+    maxScore: 1000
+})
+```
 
 #### Custom notes
 
-#### Design tips
+```js
+class FlickDown extends Flick {
+    constructor(lane, index, {
+        classNames = ['note', 'normal', 'tap', 'flick', 'up'],
+        moveAnimation = 'flickMove',
+        fadeAnimation = 'flickFade',
+        timingFunction = 'linear',
+        sizeRatio = 0.2
+    } = {}) {
+        super(lane, index, {
+            classNames,
+            moveAnimation,
+            fadeAnimation,
+            timingFunction,
+            sizeRatio
+        })
+    }
+}
+```
+
+### Design Tips
+
+#### use transition to use GPU
 
 ### Examples
 
 ### License
+
+For inquiries, please contact juneekim7@gmail.com
 
 Copyright (c) 2023 준이 (Junee, juneekim7)\
 Released under the [MIT License](./LICENSE).
