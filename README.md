@@ -154,26 +154,10 @@ myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */)
 
 ### Advanced
 
-#### Custom judgements and scores
-
-```js
-const myRhythmGame = new Game({
-    DOM: { ... },
-    judgements: [
-        // new Judgement(name, time, isCombo)
-        new Judgement('amazing', 50, true),
-        new Judgement('wow', 100, true),
-        new Judgement('umm', 50, false)
-        // miss is automatically generated
-    ],
-    maxScore: 1000
-})
-```
-
 #### Custom notes
 
 ```js
-class FlickDown extends Flick {
+class MyCustomNote extends Flick {
     constructor(lane, index, {
         classNames = ['note', 'normal', 'tap', 'flick', 'up'],
         moveAnimation = 'flickMove',
@@ -190,6 +174,32 @@ class FlickDown extends Flick {
         })
     }
 }
+```
+
+#### Additional game options
+
+```js
+const myRhythmGame = new Game({
+    DOM: { ... },
+    notes: {
+        n: (lane, index) => new Normal(lane, index),
+        l: (lane, index) => new Long(lane, index),
+        d: (lane, index) => new Drag(lane, index),
+        f: (lane, index) => new Flick(lane, index),
+        x: (lane, index) => new HoldFlick(lane, index),
+        c: (lane, index) => new MyCustomNote(lane, index)
+    }
+    judgements: [
+        // new Judgement(name, time, isCombo)
+        new Judgement('amazing', 50, true),
+        new Judgement('wow', 100, true),
+        new Judgement('umm', 50, false)
+        // miss is automatically generated
+    ],
+    maxScore: 1000,
+    sizePerBeat: ...,
+    laneSizeRaio: ...
+})
 ```
 
 ### Design Tips
