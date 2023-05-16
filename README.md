@@ -155,7 +155,7 @@ myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */)
 #### Result
 
 <center>
-    <img src="./examples/images/quick start.gif" height="400" />
+    <img src="./examples/images/quick start.gif" style="height: 50%;" />
 </center>
 
 ### Advanced
