@@ -57,8 +57,41 @@ const myRhythmGame = new Game({
         combo: document.getElementById('combo'),
         judgement: document.getElementById('judgement'),
         score: document.getElementById('score')
-    }
+    },
+    sizePerBeat: '100px',
+    laneSizeRaio: 8
 })
+```
+
+#### Design your game elements
+
+```css
+.lane {
+    width: 100px;
+    height: var(--lane-size);
+    border: 1px solid black;
+
+    display: inline-block;
+}
+
+.note {
+    width: 100%;
+    height: var(--size);
+    background-color: skyblue;
+
+    position: absolute;
+    bottom: var(--lane-size);
+}
+
+@keyframes move {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(var(--lane-size)); }
+}
+
+@keyframes fade {
+    0% { bottom: 0; height: var(--size); }
+    100% { bottom: 0; height: 0; }
+}
 ```
 
 #### Make your own song(chart)

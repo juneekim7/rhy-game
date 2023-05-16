@@ -229,8 +229,11 @@ class Info {
 
         this.difficulty = info.difficulty
         this.bpm = info.bpm
+        if (info.split) this.split = info.split
+        else this.split = 16
         this.split = info.split
-        this.delay = info.delay
+        if (info.delay) this.delay = info.delay
+        else this.delay = 0
 
         this.cover = info.cover
         this.background = info.background
