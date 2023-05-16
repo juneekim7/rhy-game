@@ -1,4 +1,4 @@
-* {
+/* * {
     margin: 0;
     padding: 0;
     
@@ -35,4 +35,31 @@
 @keyframes fade {
     0% { width: var(--size); }
     100% { width: 0vh; }
+} */
+
+.lane {
+    width: 100px;
+    height: var(--lane-size);
+    border: 1px solid black;
+
+    display: inline-block;
+}
+
+.note {
+    width: 100px;
+    height: var(--size);
+    background-color: skyblue;
+
+    position: absolute;
+    bottom: var(--lane-size);
+}
+
+@keyframes move {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(var(--lane-size)); }
+}
+
+@keyframes fade {
+    0% { bottom: 0; height: var(--size); }
+    100% { bottom: 0; height: 0; }
 }

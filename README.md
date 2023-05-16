@@ -58,8 +58,8 @@ const myRhythmGame = new Game({
         judgement: document.getElementById('judgement'),
         score: document.getElementById('score')
     },
-    sizePerBeat: '100px',
-    laneSizeRaio: 8
+    sizePerBeat: '25vh',
+    laneSizeRaio: 4
 })
 ```
 
@@ -75,12 +75,12 @@ const myRhythmGame = new Game({
 }
 
 .note {
-    width: 100%;
+    width: 100px;
     height: var(--size);
     background-color: skyblue;
 
     position: absolute;
-    bottom: var(--lane-size);
+    bottom: var(--size);
 }
 
 @keyframes move {
@@ -130,10 +130,10 @@ const myOwnSong = new Song({
         ],
         hard: [
             {
-                lane1: 'n***|n*n*|****|****|n***|n*n*|****|****',
-                lane2: '****|****|llll|llll|****|****|llll|llll',
-                lane3: '****|****|****|llll|****|****|****|llll',
-                lane4: '****|n*n*|****|****|****|n*n*|****|****'
+                lane1: 'nn**|n*n*|****|****|nn**|n*n*|****|****',
+                lane2: '**ll|****|llll|llll|**ll|****|llll|llll',
+                lane3: '****|ll**|nnnn|llll|****|ll**|****|llll',
+                lane4: '*n*n|n*n*|****|****|*n*n|n*n*|****|****'
             },
             {
                 lane1: '****|****|llll|llll|****|****|llll|llll',
@@ -151,6 +151,12 @@ const myOwnSong = new Song({
 ```js
 myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */)
 ```
+
+#### Result
+
+<center>
+    <img src="./examples/images/quick start.gif" height="400" />
+</center>
 
 ### Advanced
 
