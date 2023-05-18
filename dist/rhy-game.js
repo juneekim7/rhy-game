@@ -1,22 +1,27 @@
 "use strict";
 class Judgement {
+    static miss = new Judgement('miss', 0, false);
     name;
     time;
     isCombo;
     constructor(name, time, isCombo = true) {
+        if (time < 0)
+            throw new Error('judgement time must be not negative');
         this.name = name;
         this.time = time;
         this.isCombo = isCombo;
     }
 }
 class Note {
+    expectedTime;
     classNames;
     moveAnimation;
     fadeAnimation;
     timingFunction;
     sizeRatio;
+    isDeleted;
     createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
-        if (this.sizeRatio === 0)
+        if (this.isDeleted || this.sizeRatio === 0)
             return;
         const noteDOM = document.createElement('div');
         for (const className of this.classNames) {
@@ -28,12 +33,30 @@ class Note {
         noteDOM.addEventListener('animationend', () => {
             noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
             noteDOM.addEventListener('animationend', () => {
+                this.isDeleted = true;
                 noteDOM.remove();
             });
         });
         laneDOM.appendChild(noteDOM);
     }
-    constructor(lane, index, { classNames = ['note'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+    judge(judgements, actualTime) {
+        if (this.isDeleted)
+            return 'none';
+        const diffTime = Math.abs(actualTime - this.expectedTime);
+        for (const judgement of judgements) {
+            if (diffTime < judgement.time) {
+                this.isDeleted = true;
+                return judgement;
+            }
+        }
+        if (actualTime < this.expectedTime)
+            return 'none';
+        this.isDeleted = true;
+        return Judgement.miss;
+    }
+    constructor(expectedTime, { classNames = ['note'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        this.expectedTime = expectedTime;
+        this.isDeleted = false;
         this.classNames = classNames;
         this.moveAnimation = moveAnimation;
         this.fadeAnimation = fadeAnimation;
@@ -43,8 +66,8 @@ class Note {
 }
 // #region basic note
 class Normal extends Note {
-    constructor(lane, index, { classNames = ['note', 'normal'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, { classNames = ['note', 'normal'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -56,18 +79,21 @@ class Normal extends Note {
 class Long extends Note {
     classNames = ['note', 'long'];
     sizeRatio = 1;
-    constructor(lane, index, { classNames = ['note', 'long'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, longRequiredData, { classNames = ['note', 'long'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 1 } = {}) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
             timingFunction,
             sizeRatio
         });
+        const { lane, index } = longRequiredData;
         const noteChar = lane[index];
         let length = 1;
-        if (index > 0 && lane[index - 1] === noteChar)
-            length = 0;
+        if (index > 0 && lane[index - 1] === noteChar) {
+            this.isDeleted = true;
+            return;
+        }
         else
             while (lane[index + length] === noteChar)
                 length++;
@@ -77,8 +103,8 @@ class Long extends Note {
 // #endregion
 // #region basic mobile note
 class Tap extends Normal {
-    constructor(lane, index, { classNames = ['note', 'normal', 'tap'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, { classNames = ['note', 'normal', 'tap'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -88,8 +114,8 @@ class Tap extends Normal {
     }
 }
 class Hold extends Long {
-    constructor(lane, index, { classNames = ['note', 'long', 'hold'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, longRequiredData, { classNames = ['note', 'long', 'hold'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(expectedTime, longRequiredData, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -101,8 +127,8 @@ class Hold extends Long {
 // #endregion
 // #region advanced note
 class Drag extends Tap {
-    constructor(lane, index, { classNames = ['note', 'normal', 'tap', 'drag'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, { classNames = ['note', 'normal', 'tap', 'drag'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -112,8 +138,8 @@ class Drag extends Tap {
     }
 }
 class Flick extends Tap {
-    constructor(lane, index, { classNames = ['note', 'normal', 'tap', 'flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, { classNames = ['note', 'normal', 'tap', 'flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -123,8 +149,8 @@ class Flick extends Tap {
     }
 }
 class HoldFlick extends Hold {
-    constructor(lane, index, { classNames = ['note', 'long', 'hold', 'hold-flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(lane, index, {
+    constructor(expectedTime, longRequiredData, { classNames = ['note', 'long', 'hold', 'hold-flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+        super(expectedTime, longRequiredData, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -133,7 +159,6 @@ class HoldFlick extends Hold {
         });
     }
 }
-// #endregion
 // #endregion
 // #region song
 class Info {
@@ -176,6 +201,17 @@ class Song {
             this.chart = chart;
     }
 }
+// #endregion
+// #region timer
+class Timer {
+    initTime;
+    getTime() {
+        return new Date().getTime() - this.initTime;
+    }
+    constructor(initTime = new Date().getTime()) {
+        this.initTime = initTime;
+    }
+}
 class Game {
     DOM;
     notes;
@@ -184,6 +220,7 @@ class Game {
     delay;
     sizePerBeat;
     #laneSizeRatio;
+    createdNotes = {};
     set laneSizeRatio(ratio) {
         this.#laneSizeRatio = ratio;
         document.documentElement.style.setProperty('--lane-size', `calc(${this.sizePerBeat} * ${ratio})`);
@@ -206,11 +243,12 @@ class Game {
                 if (!chart[laneName])
                     chart[laneName] = '';
                 chart[laneName] += group[laneName].replace(/\|/g, '');
+                this.createdNotes[laneName] = [];
             }
         }
         let index = 0;
         const moveTime = song.info.timePerBeat * this.laneSizeRatio;
-        console.log(song.info.timePerBeat);
+        const expected = new Timer();
         setInterval(() => {
             for (const laneName in chart) {
                 const lane = chart[laneName];
@@ -218,8 +256,13 @@ class Game {
                     return;
                 const noteChar = lane[index];
                 if (noteChar in this.notes) {
-                    const note = this.notes[noteChar](lane, index);
+                    const note = this.notes[noteChar](expected.getTime(), {
+                        lane,
+                        index,
+                        timePerBeat: song.info.timePerBeat
+                    });
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio);
+                    this.createdNotes[laneName].push(note);
                 }
             }
             index++;
@@ -236,12 +279,29 @@ class Game {
         }, moveTime + this.delay);
         console.log(`${song.info.title} start`);
     }
+    judgeLane(laneName, actualTime) {
+        if (this.createdNotes[laneName].length === 0)
+            return;
+        const note = this.createdNotes[laneName][0];
+        // check missed note
+        if (note.isDeleted) {
+            this.createdNotes[laneName].shift();
+            this.judgeLane(laneName, actualTime);
+            return;
+        }
+        const judgement = note.judge(this.judgements, actualTime);
+        if (judgement === 'none')
+            return;
+        else
+            ; // do something
+        this.createdNotes[laneName].shift();
+    }
     constructor({ DOM = {}, notes = {
-        n: (lane, index) => new Tap(lane, index),
-        l: (lane, index) => new Hold(lane, index),
-        d: (lane, index) => new Drag(lane, index),
-        f: (lane, index) => new Flick(lane, index),
-        x: (lane, index) => new HoldFlick(lane, index)
+        n: (expectedTime) => new Tap(expectedTime),
+        l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
+        d: (expectedTime) => new Drag(expectedTime),
+        f: (expectedTime) => new Flick(expectedTime),
+        x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
     }, judgements = [
         new Judgement('perfect', 40, true),
         new Judgement('great', 100, true),
@@ -250,7 +310,7 @@ class Game {
     ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8 } = {}) {
         this.DOM = DOM;
         this.notes = notes;
-        this.judgements = judgements;
+        this.judgements = judgements.sort((j1, j2) => j1.time - j2.time);
         this.maxScore = maxScore;
         this.delay = delay;
         if (typeof sizePerBeat === 'number')

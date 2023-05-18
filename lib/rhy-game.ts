@@ -1,9 +1,12 @@
 class Judgement {
+    public static miss = new Judgement('miss', 0, false)
+
     public readonly name: string
     public readonly time: number
     public readonly isCombo: boolean
 
     public constructor(name: string, time: number, isCombo = true) {
+        if (time < 0) throw new Error('judgement time must be not negative')
         this.name = name
         this.time = time
         this.isCombo = isCombo
@@ -31,7 +34,7 @@ abstract class Note {
     public isDeleted
 
     public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
-        if (this.sizeRatio === 0) return
+        if (this.isDeleted || this.sizeRatio === 0) return
 
         const noteDOM = document.createElement('div')
         for (const className of this.classNames) {
@@ -44,11 +47,28 @@ abstract class Note {
         noteDOM.addEventListener('animationend', () => {
             noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`
             noteDOM.addEventListener('animationend', () => {
+                this.isDeleted = true
                 noteDOM.remove()
             })
         })
 
         laneDOM.appendChild(noteDOM)
+    }
+
+    public judge(judgements: Judgement[], actualTime: number) {
+        if (this.isDeleted) return 'none'
+
+        const diffTime = Math.abs(actualTime - this.expectedTime)
+        for (const judgement of judgements) {
+            if (diffTime < judgement.time) {
+                this.isDeleted = true
+                return judgement
+            }
+        }
+
+        if (actualTime < this.expectedTime) return 'none'
+        this.isDeleted = true
+        return Judgement.miss
     }
 
     public constructor(
@@ -62,7 +82,7 @@ abstract class Note {
         }: NoteDOMParams = {}
     ) {
         this.expectedTime = expectedTime
-        this.isDeleted = true
+        this.isDeleted = false
 
         this.classNames = classNames
         this.moveAnimation = moveAnimation
@@ -127,7 +147,10 @@ class Long extends Note {
 
         const noteChar = lane[index]
         let length = 1
-        if (index > 0 && lane[index - 1] === noteChar) length = 0
+        if (index > 0 && lane[index - 1] === noteChar) {
+            this.isDeleted = true
+            return
+        }
         else while (lane[index + length] === noteChar) length++
         this.sizeRatio = length
     }
@@ -425,19 +448,26 @@ class Game {
     public judgeLane(laneName: string, actualTime: number) {
         if (this.createdNotes[laneName].length === 0) return
         const note = this.createdNotes[laneName][0]
+        // check missed note
+        if (note.isDeleted) {
+            this.createdNotes[laneName].shift()
+            this.judgeLane(laneName, actualTime)
+            return
+        }
 
         const judgement = note.judge(this.judgements, actualTime)
         if (judgement === 'none') return
+        else ; // do something
         this.createdNotes[laneName].shift()
     }
 
     public constructor({
         DOM = {},
         notes = {
-            n: (expectedTime, additionalData) => new Tap(expectedTime),
+            n: (expectedTime) => new Tap(expectedTime),
             l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
-            d: (expectedTime, additionalData) => new Drag(expectedTime),
-            f: (expectedTime, additionalData) => new Flick(expectedTime),
+            d: (expectedTime) => new Drag(expectedTime),
+            f: (expectedTime) => new Flick(expectedTime),
             x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
         },
         judgements = [
@@ -453,7 +483,7 @@ class Game {
     }: GameParams = {}) {
         this.DOM = DOM
         this.notes = notes
-        this.judgements = judgements
+        this.judgements = judgements.sort((j1, j2) => j1.time - j2.time)
         this.maxScore = maxScore
         this.delay = delay
         if (typeof sizePerBeat === 'number') sizePerBeat = sizePerBeat + 'px'
