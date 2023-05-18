@@ -11,7 +11,7 @@ class Judgement {
 }
 
 // #region note
-interface NoteParams {
+interface NoteDOMParams {
     classNames?: string[]
     moveAnimation?: string
     fadeAnimation?: string
@@ -20,11 +20,15 @@ interface NoteParams {
 }
 
 abstract class Note {
+    public expectedTime
+
     public classNames
     public moveAnimation
     public fadeAnimation
     public timingFunction
     public sizeRatio
+
+    public isDeleted
 
     public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
         if (this.sizeRatio === 0) return
@@ -47,13 +51,19 @@ abstract class Note {
         laneDOM.appendChild(noteDOM)
     }
 
-    public constructor(lane: string, index: number, {
-        classNames = ['note'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
+    public constructor(
+        expectedTime: number,
+        {
+            classNames = ['note'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        this.expectedTime = expectedTime
+        this.isDeleted = true
+
         this.classNames = classNames
         this.moveAnimation = moveAnimation
         this.fadeAnimation = fadeAnimation
@@ -64,14 +74,17 @@ abstract class Note {
 
 // #region basic note
 class Normal extends Note {
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'normal'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
-        super(lane, index, {
+    public constructor(
+        expectedTime: number,
+        {
+            classNames = ['note', 'normal'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -81,24 +94,36 @@ class Normal extends Note {
     }
 }
 
+interface LongRequiredData {
+    lane: string,
+    index: number,
+    timePerBeat: number
+}
+
 class Long extends Note {
     public classNames = ['note', 'long']
     public sizeRatio = 1
 
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'long'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 1
-    }: NoteParams = {}) {
-        super(lane, index, {
+    public constructor(
+        expectedTime: number,
+        longRequiredData: LongRequiredData,
+        {
+            classNames = ['note', 'long'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 1
+        }: NoteDOMParams = {}
+    ) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
             timingFunction,
             sizeRatio
         })
+
+        const { lane, index } = longRequiredData
 
         const noteChar = lane[index]
         let length = 1
@@ -111,14 +136,17 @@ class Long extends Note {
 
 // #region basic mobile note
 class Tap extends Normal {
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'normal', 'tap'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
-        super(lane, index, {
+    public constructor(
+        expectedTime: number,
+        {
+            classNames = ['note', 'normal', 'tap'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -129,34 +157,45 @@ class Tap extends Normal {
 }
 
 class Hold extends Long {
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'long', 'hold'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
-        super(lane, index, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        })
+    public constructor(
+        expectedTime: number,
+        longRequiredData: LongRequiredData,
+        {
+            classNames = ['note', 'long', 'hold'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        super(
+            expectedTime,
+            longRequiredData,
+            {
+                classNames,
+                moveAnimation,
+                fadeAnimation,
+                timingFunction,
+                sizeRatio
+            }
+        )
     }
 }
 // #endregion
 
 // #region advanced note
 class Drag extends Tap {
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'normal', 'tap', 'drag'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
-        super(lane, index, {
+    public constructor(
+        expectedTime: number,
+        {
+            classNames = ['note', 'normal', 'tap', 'drag'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -167,14 +206,17 @@ class Drag extends Tap {
 }
 
 class Flick extends Tap {
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'normal', 'tap', 'flick'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
-        super(lane, index, {
+    public constructor(
+        expectedTime: number,
+        {
+            classNames = ['note', 'normal', 'tap', 'flick'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        super(expectedTime, {
             classNames,
             moveAnimation,
             fadeAnimation,
@@ -185,23 +227,34 @@ class Flick extends Tap {
 }
 
 class HoldFlick extends Hold {
-    public constructor(lane: string, index: number, {
-        classNames = ['note', 'long', 'hold', 'hold-flick'],
-        moveAnimation = 'move',
-        fadeAnimation = 'fade',
-        timingFunction = 'linear',
-        sizeRatio = 0.1
-    }: NoteParams = {}) {
-        super(lane, index, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        })
+    public constructor(
+        expectedTime: number,
+        longRequiredData: LongRequiredData,
+        {
+            classNames = ['note', 'long', 'hold', 'hold-flick'],
+            moveAnimation = 'move',
+            fadeAnimation = 'fade',
+            timingFunction = 'linear',
+            sizeRatio = 0.1
+        }: NoteDOMParams = {}
+    ) {
+        super(
+            expectedTime,
+            longRequiredData,
+            {
+                classNames,
+                moveAnimation,
+                fadeAnimation,
+                timingFunction,
+                sizeRatio
+            }
+        )
     }
 }
 // #endregion
+
+type AdditionalData = LongRequiredData
+
 // #endregion
 
 // #region song
@@ -262,10 +315,26 @@ class Song {
 }
 // #endregion
 
+// #region timer
+
+class Timer {
+    private initTime: number
+
+    public getTime() {
+        return new Date().getTime() - this.initTime
+    }
+
+    public constructor(initTime = new Date().getTime()) {
+        this.initTime = initTime
+    }
+}
+
+// #endregion
+
 // #region game
 type DOM = Record<string, HTMLBodyElement>
 // eslint-disable-next-line no-unused-vars
-type Notes = Record<string, (lane: string, index: number) => Note>
+type Notes = Record<string, (expectedTime: number, additionalData: AdditionalData) => Note>
 type Judgements = Judgement[]
 
 interface GameParams {
@@ -286,6 +355,8 @@ class Game {
     public delay: number
     public sizePerBeat: string
     #laneSizeRatio: number
+
+    private createdNotes: Record<string, Note[]> = {}
 
     public set laneSizeRatio(ratio: number) {
         this.#laneSizeRatio = ratio
@@ -310,12 +381,13 @@ class Game {
                 if (!(laneName in this.DOM)) continue
                 if (! chart[laneName]) chart[laneName] = ''
                 chart[laneName] += group[laneName].replace(/\|/g, '')
+                this.createdNotes[laneName] = []
             }
         }
 
         let index = 0
         const moveTime = song.info.timePerBeat * this.laneSizeRatio
-        console.log(song.info.timePerBeat)
+        const expected = new Timer()
         setInterval(() => {
             for (const laneName in chart) {
                 const lane = chart[laneName]
@@ -323,8 +395,13 @@ class Game {
 
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
-                    const note = this.notes[noteChar](lane, index)
+                    const note = this.notes[noteChar](expected.getTime(), {
+                        lane,
+                        index,
+                        timePerBeat: song.info.timePerBeat
+                    })
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
+                    this.createdNotes[laneName].push(note)
                 }
             }
             index++
@@ -345,14 +422,23 @@ class Game {
         console.log(`${song.info.title} start`)
     }
 
+    public judgeLane(laneName: string, actualTime: number) {
+        if (this.createdNotes[laneName].length === 0) return
+        const note = this.createdNotes[laneName][0]
+
+        const judgement = note.judge(this.judgements, actualTime)
+        if (judgement === 'none') return
+        this.createdNotes[laneName].shift()
+    }
+
     public constructor({
         DOM = {},
         notes = {
-            n: (lane, index) => new Tap(lane, index),
-            l: (lane, index) => new Hold(lane, index),
-            d: (lane, index) => new Drag(lane, index),
-            f: (lane, index) => new Flick(lane, index),
-            x: (lane, index) => new HoldFlick(lane, index)
+            n: (expectedTime, additionalData) => new Tap(expectedTime),
+            l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
+            d: (expectedTime, additionalData) => new Drag(expectedTime),
+            f: (expectedTime, additionalData) => new Flick(expectedTime),
+            x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
         },
         judgements = [
             new Judgement('perfect', 40, true),
