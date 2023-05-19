@@ -380,6 +380,7 @@ class Game {
     #laneSizeRatio: number
 
     private createdNotes: Record<string, Note[]> = {}
+    private judgementData: Record<string, number> = {}
 
     public set laneSizeRatio(ratio: number) {
         this.#laneSizeRatio = ratio
@@ -434,6 +435,7 @@ class Game {
     public play(song: Song, mode: string) {
         const music = new Audio(song.info.music)
         const moveTime = song.info.timePerBeat * this.laneSizeRatio
+        this.initJudge()
 
         setTimeout(() => {
             this.loadNote(song, mode)
@@ -443,6 +445,27 @@ class Game {
         }, moveTime + this.delay)
 
         console.log(`${song.info.title} start`)
+    }
+
+    private initJudge() {
+        this.judgementData = {
+            score: 0,
+            combo: 0
+        }
+
+        for (const judgement of this.judgements) {
+            this.judgementData[judgement.name] = 0
+        }
+
+        this.judgementData.miss = 0
+    }
+
+    private setJudge(judgement: Judgement) {
+        const data = this.judgementData
+        data[judgement.name]++
+        if (judgement.isCombo) data.combo++
+        else data.combo = 0
+
     }
 
     public judgeLane(laneName: string, actualTime: number) {
@@ -457,7 +480,8 @@ class Game {
 
         const judgement = note.judge(this.judgements, actualTime)
         if (judgement === 'none') return
-        else ; // do something
+
+        this.setJudge(judgement)
         this.createdNotes[laneName].shift()
     }
 
