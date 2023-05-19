@@ -2,8 +2,9 @@ declare class Judgement {
     static miss: Judgement;
     readonly name: string;
     readonly time: number;
+    readonly scoreRatio: number;
     readonly isCombo: boolean;
-    constructor(name: string, time: number, isCombo?: boolean);
+    constructor(name: string, time: number, scoreRatio: number, isCombo?: boolean);
 }
 interface NoteDOMParams {
     classNames?: string[];
@@ -22,6 +23,7 @@ declare abstract class Note {
     sizeRatio: number;
     hasJudged: boolean;
     judgement: 'none' | Judgement;
+    count: number;
     createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number): void;
     judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
@@ -35,6 +37,7 @@ interface LongRequiredData {
     timePerBeat: number;
 }
 declare class Long extends Note {
+    createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number): void;
     judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, longRequiredData: LongRequiredData, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
@@ -101,10 +104,13 @@ interface GameParams {
     delay?: number;
     sizePerBeat?: number | string;
     laneSizeRatio?: number;
+    judgementVar?: object;
+    end?: (judgementData: JudgementData) => void;
 }
 interface JudgementData {
     score: number;
     combo: number;
+    maxCombo: number;
     lastJudgement: string;
     judgements: {
         [judgementName: string]: number;
@@ -120,11 +126,14 @@ declare class Game {
     maxScore: number;
     delay: number;
     sizePerBeat: string;
+    end: (judgementData: JudgementData) => void;
     private expectedTime;
     private actualTime;
-    private createdNotes;
-    private isPressed;
-    private judgementData;
+    private scorePerNote;
+    private music;
+    private readonly createdNotes;
+    private readonly isPressed;
+    readonly judgementData: JudgementData;
     set laneSizeRatio(ratio: number);
     get laneSizeRatio(): number;
     private initJudge;
@@ -133,8 +142,10 @@ declare class Game {
     judgeLane(laneName: string, eventName: EventName, actualTime?: number): void;
     private getActualChart;
     private setKeyBind;
+    private fadeMusic;
+    private countNote;
     private loadNote;
-    play(song: Song, mode: string): void;
-    constructor({ DOM, keybind, notes, judgements, maxScore, delay, sizePerBeat, laneSizeRatio }?: GameParams);
+    play(song: Song, mode: string, index?: number): void;
+    constructor({ DOM, keybind, notes, judgements, maxScore, delay, sizePerBeat, laneSizeRatio, end }?: GameParams);
 }
 //# sourceMappingURL=rhy-game.d.ts.map

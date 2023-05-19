@@ -203,9 +203,9 @@ const myRhythmGame = new Game({
     }
     judgements: [
         // new Judgement(name, time, isCombo)
-        new Judgement('amazing', 50, true),
-        new Judgement('wow', 100, true),
-        new Judgement('umm', 50, false)
+        new Judgement('amazing', 50, 1, true),
+        new Judgement('wow', 100, 0.5, true),
+        new Judgement('umm', 50, 0.3, false)
         // miss is automatically generated
     ],
     maxScore: 1000,

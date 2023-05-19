@@ -1,14 +1,17 @@
 class Judgement {
-    public static miss = new Judgement('miss', 0, false)
+    public static miss = new Judgement('miss', 0, 0, false)
 
     public readonly name: string
     public readonly time: number
+    public readonly scoreRatio: number
     public readonly isCombo: boolean
 
-    public constructor(name: string, time: number, isCombo = true) {
+    public constructor(name: string, time: number, scoreRatio: number, isCombo = true) {
         if (time < 0) throw new Error('judgement time must be not negative')
+        if (scoreRatio < 0 || scoreRatio > 1) throw new Error('scoreRatio should be between in 0 to 1')
         this.name = name
         this.time = time
+        this.scoreRatio = scoreRatio
         this.isCombo = isCombo
     }
 }
@@ -35,6 +38,7 @@ abstract class Note {
 
     public hasJudged
     public judgement: 'none' | Judgement
+    public count: number
 
     public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
         if (this.hasJudged) return
@@ -86,14 +90,16 @@ abstract class Note {
         }: NoteDOMParams = {}
     ) {
         this.expectedTime = expectedTime
-        this.hasJudged = false
-        this.judgement = 'none'
 
         this.classNames = classNames
         this.moveAnimation = moveAnimation
         this.fadeAnimation = fadeAnimation
         this.timingFunction = timingFunction
         this.sizeRatio = sizeRatio
+
+        this.hasJudged = false
+        this.judgement = 'none'
+        this.count = 1
     }
 }
 
@@ -126,6 +132,11 @@ interface LongRequiredData {
 }
 
 class Long extends Note {
+    public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number): void {
+        if (this.sizeRatio === 1) return
+        super.createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio)
+    }
+
     public judge(judgements: Judgement[], eventName: EventName, actualTime: number) {
         if (eventName === 'keydown' && !this.hasJudged) return super.judge(judgements, eventName, actualTime)
         else if (this.hasJudged) return Judgement.miss
@@ -157,12 +168,16 @@ class Long extends Note {
         let length = 1
         while (lane[index + length] === noteChar) length++
         this.sizeRatio = length
+        this.count = 1
 
         if (index > 0 && lane[index - 1] === noteChar) {
+            // 중간 노트
             if (length !== 1) {
                 this.hasJudged = true
+                this.count = 0
                 this.judge = () => Judgement.miss
             }
+            // 끝 노트
             else {
                 this.expectedTime += timePerBeat * length
                 this.judge = (judgements: Judgement[], eventName: EventName, actualTime: number) => {
@@ -174,9 +189,8 @@ class Long extends Note {
                 }
             }
         }
-        else if (length === 1) {
-            throw new Error('long notes length should be at least 2')
-        }
+        else if (length === 1) throw new Error('long notes length should be at least 2')
+        // 시작 노트
     }
 }
 // #endregion
@@ -331,7 +345,10 @@ class Info {
         this.artist = info.artist
 
         this.difficulty = info.difficulty
-        if (info.volume) this.volume = info.volume
+        if (info.volume) {
+            if (info.volume < 0 || info.volume > 1) throw new Error('volume should be between in 0 to 1')
+            this.volume = info.volume
+        }
         else this.volume = 1
         this.bpm = info.bpm
         if (info.split) this.split = info.split
@@ -401,11 +418,14 @@ interface GameParams {
     delay?: number
     sizePerBeat?: number | string
     laneSizeRatio?: number
+    judgementVar?: object
+    end?: (judgementData: JudgementData) => void
 }
 
 interface JudgementData {
     score: number
     combo: number
+    maxCombo: number
     lastJudgement: string
     judgements: {
         [judgementName: string]: number
@@ -423,15 +443,19 @@ class Game {
     public delay: number
     public sizePerBeat: string
     #laneSizeRatio: number
+    public end: (judgementData: JudgementData) => void
 
     private expectedTime: Timer = new Timer()
     private actualTime: Timer = new Timer()
 
-    private createdNotes: Record<string, Note[]> = {}
-    private isPressed: Record<string, boolean> = {}
-    private judgementData: JudgementData = {
+    private scorePerNote = 0
+    private music: HTMLAudioElement = new Audio()
+    private readonly createdNotes: Record<string, Note[]> = {}
+    private readonly isPressed: Record<string, boolean> = {}
+    public readonly judgementData: JudgementData = {
         score: 0,
         combo: 0,
+        maxCombo: 0,
         lastJudgement: 'none',
         judgements: {}
     }
@@ -447,14 +471,13 @@ class Game {
 
     // #region judge
     private initJudge() {
-        this.judgementData = {
-            score: 0,
-            combo: 0,
-            lastJudgement: 'none',
-            judgements: {}
-        }
-
         const data = this.judgementData
+
+        data.score = 0
+        data.combo = 0
+        data.maxCombo = 0
+        data.lastJudgement = 'none'
+
         for (const judgement of this.judgements) {
             data.judgements[judgement.name] = 0
         }
@@ -468,7 +491,7 @@ class Game {
         const data = this.judgementData
 
         if (DOM.score) {
-            DOM.score.textContent = data.score.toString()
+            DOM.score.textContent = Math.round(data.score).toString()
                 .padStart(this.maxScore.toString().length, '0')
         }
         if (DOM.judgement) {
@@ -481,10 +504,14 @@ class Game {
 
     private setJudge(judgement: Judgement) {
         const data = this.judgementData
-        data.lastJudgement = judgement.name
         data.judgements[judgement.name]++
-        if (judgement.isCombo) data.combo++
+        data.score += this.scorePerNote * judgement.scoreRatio
+        if (judgement.isCombo) {
+            data.combo++
+            data.maxCombo = Math.max(data.combo, data.maxCombo)
+        }
         else data.combo = 0
+        data.lastJudgement = judgement.name
 
         this.sendJudgeToDOM()
     }
@@ -550,20 +577,56 @@ class Game {
         }
     }
 
-    private loadNote(actualChart: ActualChart, timePerBeat: number) {
-        let index = 0
+    private fadeMusic() {
+        if (this.music.volume < 0.1) {
+            this.music.pause()
+            return
+        }
+
+        this.music.volume -= 0.03
+        setTimeout(() => {
+            this.fadeMusic()
+        }, 100)
+    }
+
+    private countNote(actualChart: ActualChart) {
+        let count = 0
+
+        for (const lane of Object.values(actualChart)) {
+            for (let index = 0; index < lane.length; index++) {
+                const noteChar = lane[index]
+                if (noteChar in this.notes) {
+                    const note = this.notes[noteChar](this.expectedTime.getTime(), {
+                        lane,
+                        index,
+                        timePerBeat: 0
+                    })
+                    count += note.count
+                }
+            }
+        }
+
+        return count
+    }
+
+    private loadNote(actualChart: ActualChart, timePerBeat: number, index = 0) {
         const moveTime = timePerBeat * this.laneSizeRatio
-        setInterval(() => {
+        const noteInterval = setInterval(() => {
+            if (index === Object.values(actualChart)[0].length) {
+                this.fadeMusic()
+                this.end(this.judgementData)
+                clearInterval(noteInterval)
+            }
+
             for (const laneName in actualChart) {
                 const lane = actualChart[laneName]
-                if (index === lane.length) return
 
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar](this.expectedTime.getTime(), {
                         lane,
                         index,
-                        timePerBeat: timePerBeat
+                        timePerBeat
                     })
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
 
@@ -583,21 +646,25 @@ class Game {
         }, timePerBeat)
     }
 
-    public play(song: Song, mode: string) {
+    public play(song: Song, mode: string, index = 0) {
         const moveTime = song.info.timePerBeat * this.laneSizeRatio
+        const actualChart = this.getActualChart(song, mode)
         this.initJudge()
-        this.setKeyBind(this.getActualChart(song, mode))
+        this.setKeyBind(actualChart)
+        this.scorePerNote = this.maxScore / this.countNote(actualChart)
+
         this.expectedTime = new Timer()
         this.actualTime = new Timer(moveTime)
 
-        const music = new Audio(song.info.music)
-        music.volume = song.info.volume
+        this.music = new Audio(song.info.music)
+        this.music.volume = song.info.volume
+        this.music.currentTime = index * song.info.timePerBeat / 1000
 
         setTimeout(() => {
-            this.loadNote(this.getActualChart(song, mode), song.info.timePerBeat)
+            this.loadNote(actualChart, song.info.timePerBeat, index)
         }, 0)
         setTimeout(() => {
-            music.play()
+            this.music.play()
         }, moveTime + this.delay)
 
         console.log(`${song.info.title} start`)
@@ -615,15 +682,18 @@ class Game {
             x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
         },
         judgements = [
-            new Judgement('perfect', 40, true),
-            new Judgement('great', 80, true),
-            new Judgement('good', 100, true),
-            new Judgement('bad', 200, false)
+            new Judgement('perfect', 40, 1, true),
+            new Judgement('great', 80, 0.75, true),
+            new Judgement('good', 100, 0.5, true),
+            new Judgement('bad', 200, 0.25, false)
         ],
         maxScore = 100000,
         delay = 0,
         sizePerBeat = '100px',
-        laneSizeRatio = 8
+        laneSizeRatio = 8,
+        end = (judgementData: JudgementData) => {
+            console.log(judgementData)
+        }
     }: GameParams = {}) {
         this.DOM = DOM
         this.keybind = keybind
@@ -635,6 +705,7 @@ class Game {
         this.sizePerBeat = sizePerBeat
         this.#laneSizeRatio = laneSizeRatio
         this.laneSizeRatio = laneSizeRatio
+        this.end = end
     }
 }
 // #endregion
