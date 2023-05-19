@@ -33,7 +33,6 @@ class Note {
         noteDOM.addEventListener('animationend', () => {
             noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
             noteDOM.addEventListener('animationend', () => {
-                this.isDeleted = true;
                 noteDOM.remove();
             });
         });
@@ -165,6 +164,7 @@ class Info {
     music;
     title;
     artist;
+    chorus;
     difficulty;
     bpm;
     split;
@@ -178,6 +178,7 @@ class Info {
         this.music = info.music;
         this.title = info.title;
         this.artist = info.artist;
+        this.chorus = info.chorus;
         this.difficulty = info.difficulty;
         this.bpm = info.bpm;
         if (info.split)
@@ -208,19 +209,29 @@ class Timer {
     getTime() {
         return new Date().getTime() - this.initTime;
     }
-    constructor(initTime = new Date().getTime()) {
-        this.initTime = initTime;
+    constructor(minusTime = 0) {
+        this.initTime = new Date().getTime() + minusTime;
     }
 }
 class Game {
     DOM;
+    keybind;
     notes;
     judgements;
     maxScore;
     delay;
     sizePerBeat;
     #laneSizeRatio;
+    expectedTime = new Timer();
+    actualTime = new Timer();
     createdNotes = {};
+    isPressed = {};
+    judgementData = {
+        score: 0,
+        combo: 0,
+        lastJudgement: 'none',
+        judgements: {}
+    };
     set laneSizeRatio(ratio) {
         this.#laneSizeRatio = ratio;
         document.documentElement.style.setProperty('--lane-size', `calc(${this.sizePerBeat} * ${ratio})`);
@@ -228,75 +239,142 @@ class Game {
     get laneSizeRatio() {
         return this.#laneSizeRatio;
     }
-    loadNote(song, mode) {
+    // #region judge
+    initJudge() {
+        this.judgementData = {
+            score: 0,
+            combo: 0,
+            lastJudgement: 'none',
+            judgements: {}
+        };
+        const data = this.judgementData;
+        for (const judgement of this.judgements) {
+            data.judgements[judgement.name] = 0;
+        }
+        data.judgements.miss = 0;
+        this.sendJudgeToDOM();
+    }
+    sendJudgeToDOM() {
+        const DOM = this.DOM;
+        const data = this.judgementData;
+        if (DOM.score) {
+            DOM.score.textContent = data.score.toString()
+                .padStart(this.maxScore.toString().length, '0');
+        }
+        if (DOM.judgement) {
+            DOM.judgement.textContent = data.lastJudgement;
+        }
+        if (DOM.combo) {
+            DOM.combo.textContent = data.combo.toString();
+        }
+    }
+    setJudge(judgement) {
+        const data = this.judgementData;
+        data.lastJudgement = judgement.name;
+        data.judgements[judgement.name]++;
+        if (judgement.isCombo)
+            data.combo++;
+        else
+            data.combo = 0;
+        this.sendJudgeToDOM();
+    }
+    judgeLane(laneName, actualTime = this.actualTime.getTime()) {
+        if (!this.createdNotes[laneName])
+            throw new Error(`there is no lane ${laneName}`);
+        if (this.createdNotes[laneName].length === 0)
+            return;
+        const note = this.createdNotes[laneName][0];
+        // check missed note
+        const judgement = note.judge(this.judgements, actualTime);
+        if (judgement === 'none')
+            return;
+        this.setJudge(judgement);
+        this.createdNotes[laneName].shift();
+        if (judgement === Judgement.miss)
+            this.judgeLane(laneName, actualTime);
+    }
+    // #endregion
+    getActualChart(song, mode) {
         if (!(mode in song.chart)) {
             throw new Error(`there is no mode ${mode} in the song ${song.info.title}`);
         }
         if (song.chart[mode].length === 0) {
             throw new Error(`there is no information in the mode ${mode} of the song ${song.info.title}`);
         }
-        const chart = {};
+        const actualChart = {};
         for (const group of song.chart[mode]) {
             for (const laneName in group) {
                 if (!(laneName in this.DOM))
                     continue;
-                if (!chart[laneName])
-                    chart[laneName] = '';
-                chart[laneName] += group[laneName].replace(/\|/g, '');
+                if (!actualChart[laneName])
+                    actualChart[laneName] = '';
+                actualChart[laneName] += group[laneName].replace(/\|/g, '');
                 this.createdNotes[laneName] = [];
             }
         }
+        return actualChart;
+    }
+    setKeyBind(actualChart) {
+        for (const laneName in actualChart) {
+            this.isPressed[laneName] = false;
+            window.addEventListener('keydown', (event) => {
+                if (!(event.key in this.keybind) || this.isPressed[event.key])
+                    return;
+                this.isPressed[event.key] = true;
+                this.judgeLane(this.keybind[event.key]);
+            });
+            window.addEventListener('keyup', (event) => {
+                if (!(event.key in this.keybind))
+                    return;
+                this.isPressed[event.key] = false;
+                this.judgeLane(this.keybind[event.key]);
+            });
+        }
+    }
+    loadNote(actualChart, timePerBeat) {
         let index = 0;
-        const moveTime = song.info.timePerBeat * this.laneSizeRatio;
-        const expected = new Timer();
+        const moveTime = timePerBeat * this.laneSizeRatio;
         setInterval(() => {
-            for (const laneName in chart) {
-                const lane = chart[laneName];
+            for (const laneName in actualChart) {
+                const lane = actualChart[laneName];
                 if (index === lane.length)
                     return;
                 const noteChar = lane[index];
                 if (noteChar in this.notes) {
-                    const note = this.notes[noteChar](expected.getTime(), {
+                    const note = this.notes[noteChar](this.expectedTime.getTime(), {
                         lane,
                         index,
-                        timePerBeat: song.info.timePerBeat
+                        timePerBeat: timePerBeat
                     });
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio);
                     this.createdNotes[laneName].push(note);
+                    setTimeout(() => {
+                        if (this.createdNotes[laneName].includes(note)) {
+                            this.setJudge(Judgement.miss);
+                            this.createdNotes[laneName].shift();
+                        }
+                    }, moveTime + this.judgements[this.judgements.length - 1].time);
                 }
             }
             index++;
-        }, song.info.timePerBeat);
+        }, timePerBeat);
     }
     play(song, mode) {
         const music = new Audio(song.info.music);
         const moveTime = song.info.timePerBeat * this.laneSizeRatio;
+        this.initJudge();
+        this.setKeyBind(this.getActualChart(song, mode));
+        this.expectedTime = new Timer();
+        this.actualTime = new Timer(moveTime);
         setTimeout(() => {
-            this.loadNote(song, mode);
+            this.loadNote(this.getActualChart(song, mode), song.info.timePerBeat);
         }, 0);
         setTimeout(() => {
             music.play();
         }, moveTime + this.delay);
         console.log(`${song.info.title} start`);
     }
-    judgeLane(laneName, actualTime) {
-        if (this.createdNotes[laneName].length === 0)
-            return;
-        const note = this.createdNotes[laneName][0];
-        // check missed note
-        if (note.isDeleted) {
-            this.createdNotes[laneName].shift();
-            this.judgeLane(laneName, actualTime);
-            return;
-        }
-        const judgement = note.judge(this.judgements, actualTime);
-        if (judgement === 'none')
-            return;
-        else
-            ; // do something
-        this.createdNotes[laneName].shift();
-    }
-    constructor({ DOM = {}, notes = {
+    constructor({ DOM = {}, keybind = {}, notes = {
         n: (expectedTime) => new Tap(expectedTime),
         l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
         d: (expectedTime) => new Drag(expectedTime),
@@ -304,11 +382,12 @@ class Game {
         x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
     }, judgements = [
         new Judgement('perfect', 40, true),
-        new Judgement('great', 100, true),
-        new Judgement('great', 100, true),
-        new Judgement('bad', 500, false)
+        new Judgement('great', 80, true),
+        new Judgement('good', 100, true),
+        new Judgement('bad', 200, false)
     ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8 } = {}) {
         this.DOM = DOM;
+        this.keybind = keybind;
         this.notes = notes;
         this.judgements = judgements.sort((j1, j2) => j1.time - j2.time);
         this.maxScore = maxScore;

@@ -54,9 +54,9 @@ const myRhythmGame = new Game({
         lane4: document.getElementsByClassName('lane')[3],
 
         background: document.getElementById('background'),
-        combo: document.getElementById('combo'),
+        score: document.getElementById('score'),
         judgement: document.getElementById('judgement'),
-        score: document.getElementById('score')
+        combo: document.getElementById('combo')
     },
     sizePerBeat: '25vh',
     laneSizeRaio: 4

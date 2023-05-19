@@ -1,41 +1,10 @@
-/* * {
-    margin: 0;
-    padding: 0;
-    
-    box-sizing: border-box;
-    overflow: hidden;
+body {
+    overflow-y: hidden;
 }
 
-.lane {
-    width: var(--lane-size);
-    height: 25vh;
-    border: 1px solid black;
+#judgementData {
+    position: fixed;
 }
-
-.note {
-    width: var(--size);
-    height: 25vh;
-
-    position: absolute;
-}
-
-.normal {
-    background-color: green;
-}
-
-.long {
-    background-color: blue;
-}
-
-@keyframes move {
-    0% { transform: translateX(var(--lane-size)); }
-    100% { transform: translateX(0vw); }
-}
-
-@keyframes fade {
-    0% { width: var(--size); }
-    100% { width: 0vh; }
-} */
 
 .lane {
     width: 100px;
