@@ -6,7 +6,6 @@
   "types": "lib/rhy-game.ts",
   "scripts": {
     "build": "tsc -p .",
-    "dev": "tsc ./lib/rhygame .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
