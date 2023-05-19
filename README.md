@@ -58,6 +58,12 @@ const myRhythmGame = new Game({
         judgement: document.getElementById('judgement'),
         combo: document.getElementById('combo')
     },
+    keybind: {
+        d: 'lane1',
+        f: 'lane2',
+        j: 'lane3',
+        k: 'lane4'
+    },
     sizePerBeat: '25vh',
     laneSizeRaio: 4
 })

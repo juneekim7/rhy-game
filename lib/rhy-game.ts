@@ -22,6 +22,8 @@ interface NoteDOMParams {
     sizeRatio?: number
 }
 
+type EventName = 'keydown' | 'keyup' | 'touchstart' | 'touchend'
+
 abstract class Note {
     public expectedTime
 
@@ -31,10 +33,11 @@ abstract class Note {
     public timingFunction
     public sizeRatio
 
-    public isDeleted
+    public hasJudged
+    public judgement: 'none' | Judgement
 
     public createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number) {
-        if (this.isDeleted || this.sizeRatio === 0) return
+        if (this.hasJudged) return
 
         const noteDOM = document.createElement('div')
         for (const className of this.classNames) {
@@ -54,19 +57,21 @@ abstract class Note {
         laneDOM.appendChild(noteDOM)
     }
 
-    public judge(judgements: Judgement[], actualTime: number) {
-        if (this.isDeleted) return 'none'
+    public judge(judgements: Judgement[], eventName: EventName, actualTime: number) {
+        if (this.hasJudged) 'none'
 
         const diffTime = Math.abs(actualTime - this.expectedTime)
         for (const judgement of judgements) {
             if (diffTime < judgement.time) {
-                this.isDeleted = true
+                this.hasJudged = true
+                this.judgement = judgement
                 return judgement
             }
         }
 
         if (actualTime < this.expectedTime) return 'none'
-        this.isDeleted = true
+        this.hasJudged = true
+        this.judgement = Judgement.miss
         return Judgement.miss
     }
 
@@ -81,7 +86,8 @@ abstract class Note {
         }: NoteDOMParams = {}
     ) {
         this.expectedTime = expectedTime
-        this.isDeleted = false
+        this.hasJudged = false
+        this.judgement = 'none'
 
         this.classNames = classNames
         this.moveAnimation = moveAnimation
@@ -120,8 +126,11 @@ interface LongRequiredData {
 }
 
 class Long extends Note {
-    public classNames = ['note', 'long']
-    public sizeRatio = 1
+    public judge(judgements: Judgement[], eventName: EventName, actualTime: number) {
+        if (eventName === 'keydown' && !this.hasJudged) return super.judge(judgements, eventName, actualTime)
+        else if (this.hasJudged) return Judgement.miss
+        else return 'none'
+    }
 
     public constructor(
         expectedTime: number,
@@ -142,16 +151,32 @@ class Long extends Note {
             sizeRatio
         })
 
-        const { lane, index } = longRequiredData
+        const { lane, index, timePerBeat } = longRequiredData
 
         const noteChar = lane[index]
         let length = 1
-        if (index > 0 && lane[index - 1] === noteChar) {
-            this.isDeleted = true
-            return
-        }
-        else while (lane[index + length] === noteChar) length++
+        while (lane[index + length] === noteChar) length++
         this.sizeRatio = length
+
+        if (index > 0 && lane[index - 1] === noteChar) {
+            if (length !== 1) {
+                this.hasJudged = true
+                this.judge = () => Judgement.miss
+            }
+            else {
+                this.expectedTime += timePerBeat * length
+                this.judge = (judgements: Judgement[], eventName: EventName, actualTime: number) => {
+                    if (eventName === 'keyup' && !this.hasJudged) return super.judge(judgements, eventName, actualTime)
+                    else if (this.hasJudged) {
+                        return 'none'
+                    }
+                    else return Judgement.miss
+                }
+            }
+        }
+        else if (length === 1) {
+            throw new Error('long notes length should be at least 2')
+        }
     }
 }
 // #endregion
@@ -284,15 +309,17 @@ class Info {
     public readonly music: string
     public readonly title: string
     public readonly artist: string
-    public readonly chorus: number
 
     public readonly difficulty: Record<string, number>
+    public readonly volume: number
     public readonly bpm: number
     public readonly split: number
     public readonly delay: number
 
     public readonly cover: string
     public readonly background: string
+
+    public readonly design: object
 
     public get timePerBeat() {
         return 240000 / this.bpm / this.split
@@ -302,9 +329,10 @@ class Info {
         this.music = info.music
         this.title = info.title
         this.artist = info.artist
-        this.chorus = info.chorus
 
         this.difficulty = info.difficulty
+        if (info.volume) this.volume = info.volume
+        else this.volume = 1
         this.bpm = info.bpm
         if (info.split) this.split = info.split
         else this.split = 16
@@ -314,6 +342,8 @@ class Info {
 
         this.cover = info.cover
         this.background = info.background
+
+        this.design = info.design
     }
 }
 
@@ -459,20 +489,26 @@ class Game {
         this.sendJudgeToDOM()
     }
 
-    public judgeLane(laneName: string, actualTime = this.actualTime.getTime()) {
-        if (! this.createdNotes[laneName]) throw new Error(`there is no lane ${laneName}`)
+    public judgeLane(laneName: string, eventName: EventName, actualTime = this.actualTime.getTime()) {
+        if (!this.createdNotes[laneName]) throw new Error(`there is no lane ${laneName}`)
         if (this.createdNotes[laneName].length === 0) return
+
         const note = this.createdNotes[laneName][0]
-        // check missed note
-        const judgement = note.judge(this.judgements, actualTime)
+        if (note.hasJudged) {
+            this.createdNotes[laneName].shift()
+            this.judgeLane(laneName, eventName, actualTime)
+            return
+        }
+
+        const judgement = note.judge(this.judgements, eventName, actualTime)
         if (judgement === 'none') return
 
         this.setJudge(judgement)
         this.createdNotes[laneName].shift()
-        if (judgement === Judgement.miss) this.judgeLane(laneName, actualTime)
     }
     // #endregion
 
+    // #region play
     private getActualChart(song: Song, mode: string) {
         if (!(mode in song.chart)) {
             throw new Error(`there is no mode ${mode} in the song ${song.info.title}`)
@@ -502,14 +538,14 @@ class Game {
                 if (!(event.key in this.keybind) || this.isPressed[event.key]) return
 
                 this.isPressed[event.key] = true
-                this.judgeLane(this.keybind[event.key])
+                this.judgeLane(this.keybind[event.key], 'keydown')
             })
 
             window.addEventListener('keyup', (event) => {
                 if (!(event.key in this.keybind)) return
 
                 this.isPressed[event.key] = false
-                this.judgeLane(this.keybind[event.key])
+                this.judgeLane(this.keybind[event.key], 'keyup')
             })
         }
     }
@@ -534,10 +570,13 @@ class Game {
                     this.createdNotes[laneName].push(note)
                     setTimeout(() => {
                         if (this.createdNotes[laneName].includes(note)) {
-                            this.setJudge(Judgement.miss)
                             this.createdNotes[laneName].shift()
                         }
-                    }, moveTime + this.judgements[this.judgements.length - 1].time)
+                        if (!note.hasJudged) {
+                            note.hasJudged = true
+                            this.setJudge(Judgement.miss)
+                        }
+                    }, moveTime + timePerBeat * note.sizeRatio + this.judgements[this.judgements.length - 1].time)
                 }
             }
             index++
@@ -545,12 +584,14 @@ class Game {
     }
 
     public play(song: Song, mode: string) {
-        const music = new Audio(song.info.music)
         const moveTime = song.info.timePerBeat * this.laneSizeRatio
         this.initJudge()
         this.setKeyBind(this.getActualChart(song, mode))
         this.expectedTime = new Timer()
         this.actualTime = new Timer(moveTime)
+
+        const music = new Audio(song.info.music)
+        music.volume = song.info.volume
 
         setTimeout(() => {
             this.loadNote(this.getActualChart(song, mode), song.info.timePerBeat)
@@ -561,6 +602,7 @@ class Game {
 
         console.log(`${song.info.title} start`)
     }
+    // #endregion
 
     public constructor({
         DOM = {},

@@ -19,9 +19,10 @@ class Note {
     fadeAnimation;
     timingFunction;
     sizeRatio;
-    isDeleted;
+    hasJudged;
+    judgement;
     createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
-        if (this.isDeleted || this.sizeRatio === 0)
+        if (this.hasJudged)
             return;
         const noteDOM = document.createElement('div');
         for (const className of this.classNames) {
@@ -38,24 +39,27 @@ class Note {
         });
         laneDOM.appendChild(noteDOM);
     }
-    judge(judgements, actualTime) {
-        if (this.isDeleted)
-            return 'none';
+    judge(judgements, eventName, actualTime) {
+        if (this.hasJudged)
+            'none';
         const diffTime = Math.abs(actualTime - this.expectedTime);
         for (const judgement of judgements) {
             if (diffTime < judgement.time) {
-                this.isDeleted = true;
+                this.hasJudged = true;
+                this.judgement = judgement;
                 return judgement;
             }
         }
         if (actualTime < this.expectedTime)
             return 'none';
-        this.isDeleted = true;
+        this.hasJudged = true;
+        this.judgement = Judgement.miss;
         return Judgement.miss;
     }
     constructor(expectedTime, { classNames = ['note'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
         this.expectedTime = expectedTime;
-        this.isDeleted = false;
+        this.hasJudged = false;
+        this.judgement = 'none';
         this.classNames = classNames;
         this.moveAnimation = moveAnimation;
         this.fadeAnimation = fadeAnimation;
@@ -76,8 +80,14 @@ class Normal extends Note {
     }
 }
 class Long extends Note {
-    classNames = ['note', 'long'];
-    sizeRatio = 1;
+    judge(judgements, eventName, actualTime) {
+        if (eventName === 'keydown' && !this.hasJudged)
+            return super.judge(judgements, eventName, actualTime);
+        else if (this.hasJudged)
+            return Judgement.miss;
+        else
+            return 'none';
+    }
     constructor(expectedTime, longRequiredData, { classNames = ['note', 'long'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 1 } = {}) {
         super(expectedTime, {
             classNames,
@@ -86,17 +96,33 @@ class Long extends Note {
             timingFunction,
             sizeRatio
         });
-        const { lane, index } = longRequiredData;
+        const { lane, index, timePerBeat } = longRequiredData;
         const noteChar = lane[index];
         let length = 1;
-        if (index > 0 && lane[index - 1] === noteChar) {
-            this.isDeleted = true;
-            return;
-        }
-        else
-            while (lane[index + length] === noteChar)
-                length++;
+        while (lane[index + length] === noteChar)
+            length++;
         this.sizeRatio = length;
+        if (index > 0 && lane[index - 1] === noteChar) {
+            if (length !== 1) {
+                this.hasJudged = true;
+                this.judge = () => Judgement.miss;
+            }
+            else {
+                this.expectedTime += timePerBeat * length;
+                this.judge = (judgements, eventName, actualTime) => {
+                    if (eventName === 'keyup' && !this.hasJudged)
+                        return super.judge(judgements, eventName, actualTime);
+                    else if (this.hasJudged) {
+                        return 'none';
+                    }
+                    else
+                        return Judgement.miss;
+                };
+            }
+        }
+        else if (length === 1) {
+            throw new Error('long notes length should be at least 2');
+        }
     }
 }
 // #endregion
@@ -164,13 +190,14 @@ class Info {
     music;
     title;
     artist;
-    chorus;
     difficulty;
+    volume;
     bpm;
     split;
     delay;
     cover;
     background;
+    design;
     get timePerBeat() {
         return 240000 / this.bpm / this.split;
     }
@@ -178,8 +205,11 @@ class Info {
         this.music = info.music;
         this.title = info.title;
         this.artist = info.artist;
-        this.chorus = info.chorus;
         this.difficulty = info.difficulty;
+        if (info.volume)
+            this.volume = info.volume;
+        else
+            this.volume = 1;
         this.bpm = info.bpm;
         if (info.split)
             this.split = info.split;
@@ -192,6 +222,7 @@ class Info {
             this.delay = 0;
         this.cover = info.cover;
         this.background = info.background;
+        this.design = info.design;
     }
 }
 class Song {
@@ -278,22 +309,25 @@ class Game {
             data.combo = 0;
         this.sendJudgeToDOM();
     }
-    judgeLane(laneName, actualTime = this.actualTime.getTime()) {
+    judgeLane(laneName, eventName, actualTime = this.actualTime.getTime()) {
         if (!this.createdNotes[laneName])
             throw new Error(`there is no lane ${laneName}`);
         if (this.createdNotes[laneName].length === 0)
             return;
         const note = this.createdNotes[laneName][0];
-        // check missed note
-        const judgement = note.judge(this.judgements, actualTime);
+        if (note.hasJudged) {
+            this.createdNotes[laneName].shift();
+            this.judgeLane(laneName, eventName, actualTime);
+            return;
+        }
+        const judgement = note.judge(this.judgements, eventName, actualTime);
         if (judgement === 'none')
             return;
         this.setJudge(judgement);
         this.createdNotes[laneName].shift();
-        if (judgement === Judgement.miss)
-            this.judgeLane(laneName, actualTime);
     }
     // #endregion
+    // #region play
     getActualChart(song, mode) {
         if (!(mode in song.chart)) {
             throw new Error(`there is no mode ${mode} in the song ${song.info.title}`);
@@ -321,13 +355,13 @@ class Game {
                 if (!(event.key in this.keybind) || this.isPressed[event.key])
                     return;
                 this.isPressed[event.key] = true;
-                this.judgeLane(this.keybind[event.key]);
+                this.judgeLane(this.keybind[event.key], 'keydown');
             });
             window.addEventListener('keyup', (event) => {
                 if (!(event.key in this.keybind))
                     return;
                 this.isPressed[event.key] = false;
-                this.judgeLane(this.keybind[event.key]);
+                this.judgeLane(this.keybind[event.key], 'keyup');
             });
         }
     }
@@ -350,22 +384,26 @@ class Game {
                     this.createdNotes[laneName].push(note);
                     setTimeout(() => {
                         if (this.createdNotes[laneName].includes(note)) {
-                            this.setJudge(Judgement.miss);
                             this.createdNotes[laneName].shift();
                         }
-                    }, moveTime + this.judgements[this.judgements.length - 1].time);
+                        if (!note.hasJudged) {
+                            note.hasJudged = true;
+                            this.setJudge(Judgement.miss);
+                        }
+                    }, moveTime + timePerBeat * note.sizeRatio + this.judgements[this.judgements.length - 1].time);
                 }
             }
             index++;
         }, timePerBeat);
     }
     play(song, mode) {
-        const music = new Audio(song.info.music);
         const moveTime = song.info.timePerBeat * this.laneSizeRatio;
         this.initJudge();
         this.setKeyBind(this.getActualChart(song, mode));
         this.expectedTime = new Timer();
         this.actualTime = new Timer(moveTime);
+        const music = new Audio(song.info.music);
+        music.volume = song.info.volume;
         setTimeout(() => {
             this.loadNote(this.getActualChart(song, mode), song.info.timePerBeat);
         }, 0);
@@ -374,6 +412,7 @@ class Game {
         }, moveTime + this.delay);
         console.log(`${song.info.title} start`);
     }
+    // #endregion
     constructor({ DOM = {}, keybind = {}, notes = {
         n: (expectedTime) => new Tap(expectedTime),
         l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
