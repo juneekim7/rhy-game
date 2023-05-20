@@ -271,6 +271,7 @@ class Game {
     delay;
     sizePerBeat;
     #laneSizeRatio;
+    update;
     end;
     expectedTime = new Timer();
     actualTime = new Timer();
@@ -331,6 +332,7 @@ class Game {
             data.combo = 0;
         data.lastJudgement = judgement.name;
         this.sendJudgeToDOM();
+        this.update(this.judgementData);
     }
     judgeLane(laneName, eventName, actualTime = this.actualTime.getTime()) {
         if (!this.createdNotes[laneName])
@@ -479,7 +481,9 @@ class Game {
         new Judgement('great', 80, 0.75, true),
         new Judgement('good', 100, 0.5, true),
         new Judgement('bad', 200, 0.25, false)
-    ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8, end = (judgementData) => {
+    ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8, update = (judgementData) => {
+        console.log(judgementData);
+    }, end = (judgementData) => {
         console.log(judgementData);
     } } = {}) {
         this.DOM = DOM;
@@ -493,6 +497,7 @@ class Game {
         this.sizePerBeat = sizePerBeat;
         this.#laneSizeRatio = laneSizeRatio;
         this.laneSizeRatio = laneSizeRatio;
+        this.update = update;
         this.end = end;
     }
 }

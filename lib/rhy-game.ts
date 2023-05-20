@@ -419,6 +419,7 @@ interface GameParams {
     sizePerBeat?: number | string
     laneSizeRatio?: number
     judgementVar?: object
+    update?: (judgementData: JudgementData) => void
     end?: (judgementData: JudgementData) => void
 }
 
@@ -443,6 +444,7 @@ class Game {
     public delay: number
     public sizePerBeat: string
     #laneSizeRatio: number
+    public update: (judgementData: JudgementData) => void
     public end: (judgementData: JudgementData) => void
 
     private expectedTime: Timer = new Timer()
@@ -514,6 +516,7 @@ class Game {
         data.lastJudgement = judgement.name
 
         this.sendJudgeToDOM()
+        this.update(this.judgementData)
     }
 
     public judgeLane(laneName: string, eventName: EventName, actualTime = this.actualTime.getTime()) {
@@ -691,6 +694,9 @@ class Game {
         delay = 0,
         sizePerBeat = '100px',
         laneSizeRatio = 8,
+        update = (judgementData: JudgementData) => {
+            console.log(judgementData)
+        },
         end = (judgementData: JudgementData) => {
             console.log(judgementData)
         }
@@ -705,6 +711,7 @@ class Game {
         this.sizePerBeat = sizePerBeat
         this.#laneSizeRatio = laneSizeRatio
         this.laneSizeRatio = laneSizeRatio
+        this.update = update
         this.end = end
     }
 }

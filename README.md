@@ -117,7 +117,8 @@ const myOwnSong = new Song({
         },
 
         cover: './cover/img.png',
-        background: './background/img.png'
+        background: './background/img.png',
+        design: { /* anything you want to put ex) main color */ }
     },
     chart: {
         easy: [
@@ -194,12 +195,12 @@ class MyCustomNote extends Flick {
 const myRhythmGame = new Game({
     DOM: { ... },
     notes: {
-        n: (lane, index) => new Normal(lane, index),
-        l: (lane, index) => new Long(lane, index),
-        d: (lane, index) => new Drag(lane, index),
-        f: (lane, index) => new Flick(lane, index),
-        x: (lane, index) => new HoldFlick(lane, index),
-        c: (lane, index) => new MyCustomNote(lane, index)
+        n: (expectedTime) => new Tap(expectedTime),
+        l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
+        d: (expectedTime) => new Drag(expectedTime),
+        f: (expectedTime) => new Flick(expectedTime),
+        x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData),
+        c: (expectedTime, additionalData) => new MyCustomNote(expectedTime, additionalData)
     }
     judgements: [
         // new Judgement(name, time, isCombo)
@@ -209,8 +210,15 @@ const myRhythmGame = new Game({
         // miss is automatically generated
     ],
     maxScore: 1000,
+    delay: 500,
     sizePerBeat: ...,
-    laneSizeRaio: ...
+    laneSizeRaio: ...,
+    update: (judgementData) => {
+        if (judgementData.combo === 0) console.log('oh, no!')
+    },
+    end: (judgementData) => {
+        if (judgementData.judgements.miss === 0) console.log('wow')
+    }
 })
 ```
 
