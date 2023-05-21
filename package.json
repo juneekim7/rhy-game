@@ -15,7 +15,7 @@
   },
   "files": [
     "dist",
-    "lib"
+    "lib/rhy-game.ts"
   ],
   "keywords": [
     "web",
