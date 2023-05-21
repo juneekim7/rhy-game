@@ -453,6 +453,8 @@ class Game {
         }, timePerBeat);
     }
     play(song, mode, index = 0) {
+        if (!(mode in song.chart))
+            throw new Error(`there is no mode '${mode}' in ${song.info.title}`);
         const moveTime = song.info.timePerBeat * this.laneSizeRatio;
         const actualChart = this.getActualChart(song, mode);
         this.initJudge();

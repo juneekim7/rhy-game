@@ -6,7 +6,7 @@
   "types": "dist/rhy-game.d.ts",
   "scripts": {
     "build": "tsc -p .",
-    "minify": "uglify /dist/rhy-game.js -o /dist/rhy-game.min.js",
+    "minify": "uglifyjs ./dist/rhy-game.js -o ./dist/rhy-game.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
