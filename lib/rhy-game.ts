@@ -617,7 +617,9 @@ class Game {
         const noteInterval = setInterval(() => {
             if (index === Object.values(actualChart)[0].length) {
                 this.fadeMusic()
-                this.end(this.judgementData)
+                setTimeout(() => {
+                    this.end(this.judgementData)
+                }, moveTime + timePerBeat + this.judgements[this.judgements.length - 1].time)
                 clearInterval(noteInterval)
             }
 
@@ -645,6 +647,7 @@ class Game {
                     }, moveTime + timePerBeat * note.sizeRatio + this.judgements[this.judgements.length - 1].time)
                 }
             }
+
             index++
         }, timePerBeat)
     }
