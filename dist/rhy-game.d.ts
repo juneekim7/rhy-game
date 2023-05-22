@@ -105,7 +105,7 @@ interface GameParams {
     delay?: number;
     sizePerBeat?: number | string;
     laneSizeRatio?: number;
-    judgementVar?: object;
+    judgementPosition?: number;
     update?: (judgementData: JudgementData) => void;
     end?: (judgementData: JudgementData) => void;
 }
@@ -128,6 +128,7 @@ declare class Game {
     maxScore: number;
     delay: number;
     sizePerBeat: string;
+    judgementPosition: number;
     update: (judgementData: JudgementData) => void;
     end: (judgementData: JudgementData) => void;
     private expectedTime;
@@ -149,6 +150,6 @@ declare class Game {
     private countNote;
     private loadNote;
     play(song: Song, mode: string, index?: number): void;
-    constructor({ DOM, keybind, notes, judgements, maxScore, delay, sizePerBeat, laneSizeRatio, update, end }?: GameParams);
+    constructor({ DOM, keybind, notes, judgements, maxScore, delay, sizePerBeat, laneSizeRatio, judgementPosition, update, end }?: GameParams);
 }
 //# sourceMappingURL=rhy-game.d.ts.map

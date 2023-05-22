@@ -7,6 +7,15 @@ body {
     z-index: 1;
 }
 
+#line {
+    width: 400px;
+    height: 1px;
+    background-color: blue;
+    
+    position: absolute;
+    bottom: calc(var(--lane-size) * 0.2);
+}
+
 .lane {
     width: 100px;
     height: var(--lane-size);

@@ -1,3 +1,6 @@
+## 0.7.0
+- `ADDED` judgementPosition
+
 ## 0.6.11
 - `CHANGED` Normal notes do not be judged when onkeyup
 

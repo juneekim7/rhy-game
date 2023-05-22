@@ -426,7 +426,7 @@ interface GameParams {
     delay?: number
     sizePerBeat?: number | string
     laneSizeRatio?: number
-    judgementVar?: object
+    judgementPosition?: number
     update?: (judgementData: JudgementData) => void
     end?: (judgementData: JudgementData) => void
 }
@@ -452,6 +452,7 @@ class Game {
     public delay: number
     public sizePerBeat: string
     #laneSizeRatio: number
+    public judgementPosition: number
     public update: (judgementData: JudgementData) => void
     public end: (judgementData: JudgementData) => void
 
@@ -673,7 +674,7 @@ class Game {
         this.scorePerNote = this.maxScore / this.countNote(actualChart)
 
         this.expectedTime = new Timer()
-        this.actualTime = new Timer(moveTime)
+        this.actualTime = new Timer(moveTime * (1 - this.judgementPosition))
 
         this.music = new Audio(song.info.music)
         this.music.volume = song.info.volume
@@ -711,6 +712,7 @@ class Game {
         delay = 0,
         sizePerBeat = '100px',
         laneSizeRatio = 8,
+        judgementPosition = 0,
         update = (judgementData: JudgementData) => {
             console.log(judgementData)
         },
@@ -728,6 +730,8 @@ class Game {
         this.sizePerBeat = sizePerBeat
         this.#laneSizeRatio = laneSizeRatio
         this.laneSizeRatio = laneSizeRatio
+        if (judgementPosition < 0 || judgementPosition > 1) throw new Error('The value of judgementPosition must be between 0 and 1.')
+        this.judgementPosition = judgementPosition
         this.update = update
         this.end = end
     }

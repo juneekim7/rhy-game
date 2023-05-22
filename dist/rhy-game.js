@@ -280,6 +280,7 @@ class Game {
     delay;
     sizePerBeat;
     #laneSizeRatio;
+    judgementPosition;
     update;
     end;
     expectedTime = new Timer();
@@ -473,7 +474,7 @@ class Game {
         this.setKeyBind(actualChart);
         this.scorePerNote = this.maxScore / this.countNote(actualChart);
         this.expectedTime = new Timer();
-        this.actualTime = new Timer(moveTime);
+        this.actualTime = new Timer(moveTime * (1 - this.judgementPosition));
         this.music = new Audio(song.info.music);
         this.music.volume = song.info.volume;
         this.music.currentTime = index * song.info.timePerBeat / 1000;
@@ -499,7 +500,7 @@ class Game {
         new Judgement('great', 80, 0.75, true),
         new Judgement('good', 100, 0.5, true),
         new Judgement('bad', 200, 0.25, false)
-    ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8, update = (judgementData) => {
+    ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8, judgementPosition = 0, update = (judgementData) => {
         console.log(judgementData);
     }, end = (judgementData) => {
         console.log(judgementData);
@@ -515,6 +516,9 @@ class Game {
         this.sizePerBeat = sizePerBeat;
         this.#laneSizeRatio = laneSizeRatio;
         this.laneSizeRatio = laneSizeRatio;
+        if (judgementPosition < 0 || judgementPosition > 1)
+            throw new Error('The value of judgementPosition must be between 0 and 1.');
+        this.judgementPosition = judgementPosition;
         this.update = update;
         this.end = end;
     }
