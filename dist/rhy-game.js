@@ -219,6 +219,7 @@ class Info {
     bpm;
     split;
     delay;
+    startFrom;
     cover;
     background;
     design;
@@ -242,11 +243,14 @@ class Info {
             this.split = info.split;
         else
             this.split = 16;
-        this.split = info.split;
         if (info.delay)
             this.delay = info.delay;
         else
             this.delay = 0;
+        if (info.startFrom)
+            this.startFrom = info.startFrom;
+        else
+            this.startFrom = 0;
         this.cover = info.cover;
         this.background = info.background;
         this.design = info.design;
@@ -429,6 +433,7 @@ class Game {
     }
     loadNote(actualChart, timePerBeat, index = 0) {
         const moveTime = timePerBeat * this.laneSizeRatio;
+        const judgeTime = moveTime * (1 - this.judgementPosition);
         const worstJudgement = this.judgements.at(-1);
         if (worstJudgement === undefined)
             throw new Error('There should be at least one judgement.');
@@ -459,7 +464,7 @@ class Game {
                             note.hasJudged = true;
                             this.setJudge(Judgement.miss);
                         }
-                    }, moveTime * (1 - this.judgementPosition) + worstJudgement.time);
+                    }, judgeTime + worstJudgement.time);
                 }
             }
             index++;
@@ -469,15 +474,16 @@ class Game {
         if (!(mode in song.chart))
             throw new Error(`there is no mode '${mode}' in ${song.info.title}`);
         const moveTime = song.info.timePerBeat * this.laneSizeRatio;
+        const judgeTime = moveTime * (1 - this.judgementPosition);
         const actualChart = this.getActualChart(song, mode);
         this.initJudge();
         this.setKeyBind(actualChart);
         this.scorePerNote = this.maxScore / this.countNote(actualChart);
         this.expectedTime = new Timer();
-        this.actualTime = new Timer(moveTime * (1 - this.judgementPosition));
+        this.actualTime = new Timer(judgeTime);
         this.music = new Audio(song.info.music);
         this.music.volume = song.info.volume;
-        this.music.currentTime = index * song.info.timePerBeat / 1000;
+        this.music.currentTime = index * song.info.timePerBeat / 1000 + song.info.startFrom;
         setTimeout(() => {
             if (this.DOM.background)
                 this.DOM.background.style.backgroundImage = `url('${song.info.background}')`;
@@ -485,7 +491,7 @@ class Game {
         }, 0);
         setTimeout(() => {
             this.music.play();
-        }, moveTime + this.delay);
+        }, judgeTime + this.delay + song.info.delay);
         console.log(`${song.info.title} start`);
     }
     // #endregion

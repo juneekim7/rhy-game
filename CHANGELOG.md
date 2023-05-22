@@ -1,3 +1,7 @@
+## 0.7.2
+- `ADDED` startFrom in Info which indicates where to start music by ms
+- `FIXED` Music play (delay) time update for [0.7.0](#070)
+
 ## 0.7.1
 - `FIXED` Miss time update for [0.7.0](#070)
 

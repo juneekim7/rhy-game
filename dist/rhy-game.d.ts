@@ -67,6 +67,7 @@ declare class Info {
     readonly bpm: number;
     readonly split: number;
     readonly delay: number;
+    readonly startFrom: number;
     readonly cover: string;
     readonly background: string;
     readonly design: object;
