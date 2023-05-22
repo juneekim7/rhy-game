@@ -7,6 +7,9 @@ class Judgement {
     public readonly isCombo: boolean
 
     public constructor(name: string, time: number, scoreRatio: number, isCombo = true) {
+        if ([name, time, scoreRatio, isCombo].map((arg) => typeof arg).includes('undefined')) {
+            throw new Error('judgement must requires name, time, scoreRatio')
+        }
         if (time < 0) throw new Error('judgement time must be not negative')
         if (scoreRatio < 0 || scoreRatio > 1) throw new Error('scoreRatio should be between in 0 to 1')
         this.name = name
@@ -634,8 +637,10 @@ class Game {
                         timePerBeat
                     })
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
-
                     this.createdNotes[laneName].push(note)
+
+                    if (this.judgements.length === 0) throw new Error('There should be at least one judgement.')
+                    const worstJudgementTime = this.judgements.at(-1)!.time
                     setTimeout(() => {
                         if (this.createdNotes[laneName].includes(note)) {
                             this.createdNotes[laneName].shift()
@@ -644,7 +649,8 @@ class Game {
                             note.hasJudged = true
                             this.setJudge(Judgement.miss)
                         }
-                    }, moveTime + timePerBeat * note.sizeRatio + this.judgements[this.judgements.length - 1].time)
+                    }, moveTime + timePerBeat * note.sizeRatio
+                        + Math.min(worstJudgementTime, timePerBeat))
                 }
             }
 
