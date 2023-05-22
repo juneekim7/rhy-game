@@ -29,6 +29,7 @@ declare abstract class Note {
     constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
 declare class Normal extends Note {
+    judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
 interface LongRequiredData {

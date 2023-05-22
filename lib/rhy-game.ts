@@ -108,6 +108,11 @@ abstract class Note {
 
 // #region basic note
 class Normal extends Note {
+    public judge(judgements: Judgement[], eventName: EventName, actualTime: number) {
+        if (eventName === 'keydown') return super.judge(judgements, eventName, actualTime)
+        else return 'none'
+    }
+
     public constructor(
         expectedTime: number,
         {

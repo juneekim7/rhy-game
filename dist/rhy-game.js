@@ -78,6 +78,12 @@ class Note {
 }
 // #region basic note
 class Normal extends Note {
+    judge(judgements, eventName, actualTime) {
+        if (eventName === 'keydown')
+            return super.judge(judgements, eventName, actualTime);
+        else
+            return 'none';
+    }
     constructor(expectedTime, { classNames = ['note', 'normal'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
         super(expectedTime, {
             classNames,

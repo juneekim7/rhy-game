@@ -1,5 +1,7 @@
-## 0.6.10
+## 0.6.11
 - `CHANGED` Normal notes do not be judged when onkeyup
+
+## 0.6.10
 - `CHANGED` Do not miss if judgement time is larger than timePerBeat (discard the change of [0.6.8](#068))
 
 ## 0.6.9
