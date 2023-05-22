@@ -422,6 +422,9 @@ class Game {
     }
     loadNote(actualChart, timePerBeat, index = 0) {
         const moveTime = timePerBeat * this.laneSizeRatio;
+        const worstJudgement = this.judgements.at(-1);
+        if (worstJudgement === undefined)
+            throw new Error('There should be at least one judgement.');
         const noteInterval = setInterval(() => {
             if (index === Object.values(actualChart)[0].length) {
                 this.fadeMusic();
@@ -441,9 +444,6 @@ class Game {
                     });
                     note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio);
                     this.createdNotes[laneName].push(note);
-                    if (this.judgements.length === 0)
-                        throw new Error('There should be at least one judgement.');
-                    const worstJudgementTime = this.judgements.at(-1).time;
                     setTimeout(() => {
                         if (this.createdNotes[laneName].includes(note)) {
                             this.createdNotes[laneName].shift();
@@ -452,8 +452,7 @@ class Game {
                             note.hasJudged = true;
                             this.setJudge(Judgement.miss);
                         }
-                    }, moveTime + timePerBeat * note.sizeRatio
-                        + Math.min(worstJudgementTime, timePerBeat));
+                    }, moveTime + worstJudgement.time);
                 }
             }
             index++;
