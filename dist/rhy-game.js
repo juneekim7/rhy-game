@@ -466,7 +466,8 @@ class Game {
         this.music.volume = song.info.volume;
         this.music.currentTime = index * song.info.timePerBeat / 1000;
         setTimeout(() => {
-            this.DOM.background.style.backgroundImage = `url('${song.info.background}')`;
+            if (this.DOM.background)
+                this.DOM.background.style.backgroundImage = `url('${song.info.background}')`;
             this.loadNote(actualChart, song.info.timePerBeat, index);
         }, 0);
         setTimeout(() => {
