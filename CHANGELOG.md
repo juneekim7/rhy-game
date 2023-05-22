@@ -1,3 +1,6 @@
+## 0.7.1
+- `FIXED` Miss time update for [0.7.0](#070)
+
 ## 0.7.0
 - `ADDED` judgementPosition
 

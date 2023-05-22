@@ -656,7 +656,7 @@ class Game {
                             note.hasJudged = true
                             this.setJudge(Judgement.miss)
                         }
-                    }, moveTime + worstJudgement.time)
+                    }, moveTime * (1 - this.judgementPosition) + worstJudgement.time)
                 }
             }
 
