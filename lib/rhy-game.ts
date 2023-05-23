@@ -531,7 +531,7 @@ class Game {
     }
 
     public judgeLane(laneName: string, eventName: EventName, actualTime = this.actualTime.getTime()) {
-        if (!this.createdNotes[laneName]) throw new Error(`there is no lane ${laneName}`)
+        if (!this.createdNotes[laneName]) throw new Error(`there is no lane '${laneName}'`)
         if (this.createdNotes[laneName].length === 0) return
 
         const note = this.createdNotes[laneName][0]
@@ -552,10 +552,10 @@ class Game {
     // #region play
     private getActualChart(song: Song, mode: string) {
         if (!(mode in song.chart)) {
-            throw new Error(`there is no mode ${mode} in the song ${song.info.title}`)
+            throw new Error(`There is no mode '${mode}' in the song '${song.info.title}'`)
         }
         if (song.chart[mode].length === 0) {
-            throw new Error(`there is no information in the mode ${mode} of the song ${song.info.title}`)
+            throw new Error(`There is no information in the mode '${mode}' of the song '${song.info.title}'`)
         }
 
         const actualChart: ActualChart = {}
@@ -568,6 +568,9 @@ class Game {
             }
         }
 
+        if (Object.keys(actualChart).length === 0) {
+            throw new Error(`There is no lane of the song '${song.info.title}' in mode '${mode}' that matches to DOM`)
+        }
         return actualChart
     }
 
@@ -629,46 +632,46 @@ class Game {
         const worstJudgement = this.judgements.at(-1)
         if (worstJudgement === undefined) throw new Error('There should be at least one judgement.')
 
-        const noteInterval = setInterval(() => {
-            if (index === Object.values(actualChart)[0].length) {
-                this.fadeMusic()
+        if (index === Object.values(actualChart)[0].length) {
+            this.fadeMusic()
+            setTimeout(() => {
+                this.end(this.judgementData)
+            }, moveTime + timePerBeat + this.judgements[this.judgements.length - 1].time)
+            return
+        }
+
+        for (const laneName in actualChart) {
+            const lane = actualChart[laneName]
+
+            const noteChar = lane[index]
+            if (noteChar in this.notes) {
+                const note = this.notes[noteChar](this.expectedTime.getTime(), {
+                    lane,
+                    index,
+                    timePerBeat
+                })
+                note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
+                this.createdNotes[laneName].push(note)
+
                 setTimeout(() => {
-                    this.end(this.judgementData)
-                }, moveTime + timePerBeat + this.judgements[this.judgements.length - 1].time)
-                clearInterval(noteInterval)
+                    if (this.createdNotes[laneName].includes(note)) {
+                        this.createdNotes[laneName].shift()
+                    }
+                    if (!note.hasJudged) {
+                        note.hasJudged = true
+                        this.setJudge(Judgement.miss)
+                    }
+                }, judgeTime + worstJudgement.time)
             }
+        }
 
-            for (const laneName in actualChart) {
-                const lane = actualChart[laneName]
-
-                const noteChar = lane[index]
-                if (noteChar in this.notes) {
-                    const note = this.notes[noteChar](this.expectedTime.getTime(), {
-                        lane,
-                        index,
-                        timePerBeat
-                    })
-                    note.createDOM(this.DOM[laneName], moveTime, this.sizePerBeat, this.laneSizeRatio)
-                    this.createdNotes[laneName].push(note)
-
-                    setTimeout(() => {
-                        if (this.createdNotes[laneName].includes(note)) {
-                            this.createdNotes[laneName].shift()
-                        }
-                        if (!note.hasJudged) {
-                            note.hasJudged = true
-                            this.setJudge(Judgement.miss)
-                        }
-                    }, judgeTime + worstJudgement.time)
-                }
-            }
-
-            index++
-        }, timePerBeat)
+        setTimeout(() => {
+            this.loadNote(actualChart, timePerBeat, index + 1)
+        }, timePerBeat * index - this.actualTime.getTime())
     }
 
     public play(song: Song, mode: string, index = 0) {
-        if (!(mode in song.chart)) throw new Error(`there is no mode '${mode}' in ${song.info.title}`)
+        if (!(mode in song.chart)) throw new Error(`there is no mode '${mode}' in '${song.info.title}'`)
 
         const moveTime = song.info.timePerBeat * this.laneSizeRatio
         const judgeTime = moveTime * (1 - this.judgementPosition)
@@ -684,13 +687,12 @@ class Game {
         this.music.volume = song.info.volume
         this.music.currentTime = index * song.info.timePerBeat / 1000 + song.info.startFrom
 
-        setTimeout(() => {
-            if (this.DOM.background) this.DOM.background.style.backgroundImage = `url('${song.info.background}')`
-            this.loadNote(actualChart, song.info.timePerBeat, index)
-        }, 0)
+        if (this.DOM.background) this.DOM.background.style.backgroundImage = `url('${song.info.background}')`
+
+        this.loadNote(actualChart, song.info.timePerBeat, index)
         setTimeout(() => {
             this.music.play()
-        }, judgeTime + this.delay + song.info.delay)
+        }, moveTime + this.delay + song.info.delay)
 
         console.log(`${song.info.title} start`)
     }

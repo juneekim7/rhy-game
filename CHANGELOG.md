@@ -1,3 +1,8 @@
+## 0.8.0
+- `MAIN UPDATE` Accurate time with decimal ms
+- `ADDED` Quotes in error message
+- `FIXED` Occur error message when DOM does not match with keybind
+
 ## 0.7.2
 - `ADDED` startFrom in Info which indicates where to start music by ms
 - `FIXED` Music play (delay) time update for [0.7.0](#070)
@@ -6,7 +11,7 @@
 - `FIXED` Miss time update for [0.7.0](#070)
 
 ## 0.7.0
-- `ADDED` judgementPosition
+- `MAIN UPDATE` judgementPosition
 
 ## 0.6.11
 - `CHANGED` Normal notes do not be judged when onkeyup

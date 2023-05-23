@@ -1,6 +1,6 @@
 {
   "name": "rhy-game",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "description": "make your own web rhythm game easily!",
   "main": "dist/rhy-game.js",
   "types": "dist/rhy-game.d.ts",
