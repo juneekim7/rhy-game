@@ -1,3 +1,6 @@
+## 0.8.1
+- `FIXED` Accurate time for first note DOM create
+
 ## 0.8.0
 - `MAIN UPDATE` Accurate time with decimal ms
 - `ADDED` Quotes in error message
