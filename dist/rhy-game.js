@@ -434,10 +434,11 @@ class Game {
         }
         return count;
     }
-    loadNote(actualChart, timePerBeat, index = 0) {
+    loadNote(actualChart, timePerBeat, startIndex = 0, beat = 0) {
         const moveTime = timePerBeat * this.laneSizeRatio;
         const judgeTime = moveTime * (1 - this.judgementPosition);
         const worstJudgement = this.judgements.at(-1);
+        const index = startIndex + beat;
         if (worstJudgement === undefined)
             throw new Error('There should be at least one judgement.');
         if (index === Object.values(actualChart)[0].length) {
@@ -469,9 +470,10 @@ class Game {
                 }, judgeTime + worstJudgement.time);
             }
         }
+        beat++;
         setTimeout(() => {
-            this.loadNote(actualChart, timePerBeat, index + 1);
-        }, timePerBeat * index - this.actualTime.getTime());
+            this.loadNote(actualChart, timePerBeat, startIndex, beat);
+        }, timePerBeat * beat - this.expectedTime.getTime());
     }
     play(song, mode, index = 0) {
         if (!(mode in song.chart))
@@ -486,15 +488,15 @@ class Game {
         this.actualTime = new Timer(judgeTime);
         this.music = new Audio(song.info.music);
         this.music.volume = song.info.volume;
-        this.music.currentTime = index * song.info.timePerBeat / 1000 + song.info.startFrom;
+        this.music.currentTime = (index * song.info.timePerBeat + song.info.startFrom) / 1000;
         if (this.DOM.background)
             this.DOM.background.style.backgroundImage = `url('${song.info.background}')`;
         setTimeout(() => {
             this.loadNote(actualChart, song.info.timePerBeat, index);
-        }, moveTime);
+        }, 0);
         setTimeout(() => {
             this.music.play();
-        }, moveTime + this.delay + song.info.delay);
+        }, judgeTime + this.delay + song.info.delay - this.expectedTime.getTime());
         console.log(`${song.info.title} start`);
     }
     // #endregion

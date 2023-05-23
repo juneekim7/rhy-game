@@ -626,10 +626,11 @@ class Game {
         return count
     }
 
-    private loadNote(actualChart: ActualChart, timePerBeat: number, index = 0) {
+    private loadNote(actualChart: ActualChart, timePerBeat: number, startIndex = 0, beat = 0) {
         const moveTime = timePerBeat * this.laneSizeRatio
         const judgeTime = moveTime * (1 - this.judgementPosition)
         const worstJudgement = this.judgements.at(-1)
+        const index = startIndex + beat
         if (worstJudgement === undefined) throw new Error('There should be at least one judgement.')
 
         if (index === Object.values(actualChart)[0].length) {
@@ -665,9 +666,10 @@ class Game {
             }
         }
 
+        beat++
         setTimeout(() => {
-            this.loadNote(actualChart, timePerBeat, index + 1)
-        }, timePerBeat * index - this.actualTime.getTime())
+            this.loadNote(actualChart, timePerBeat, startIndex, beat)
+        }, timePerBeat * beat - this.expectedTime.getTime())
     }
 
     public play(song: Song, mode: string, index = 0) {
@@ -685,16 +687,16 @@ class Game {
 
         this.music = new Audio(song.info.music)
         this.music.volume = song.info.volume
-        this.music.currentTime = index * song.info.timePerBeat / 1000 + song.info.startFrom
+        this.music.currentTime = (index * song.info.timePerBeat + song.info.startFrom) / 1000
 
         if (this.DOM.background) this.DOM.background.style.backgroundImage = `url('${song.info.background}')`
 
         setTimeout(() => {
             this.loadNote(actualChart, song.info.timePerBeat, index)
-        }, moveTime)
+        }, 0)
         setTimeout(() => {
             this.music.play()
-        }, moveTime + this.delay + song.info.delay)
+        }, judgeTime + this.delay + song.info.delay - this.expectedTime.getTime())
 
         console.log(`${song.info.title} start`)
     }

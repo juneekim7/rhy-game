@@ -1,4 +1,9 @@
 ## 0.8.1
+- `FIXED` music play time
+- `FIXED` when play with different index
+- `FIXED` startFrom was second but fixed into ms
+
+## 0.8.1
 - `FIXED` Accurate time for first note DOM create
 
 ## 0.8.0
