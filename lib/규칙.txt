@@ -1,0 +1,11 @@
+아래로 갈수록 의존성 커짐
+
+class 에서
+1. 데이터
+2. setter, getter
+3. private pure function
+4. private action function
+5. public pure function
+6. public action function
+7. constructor
+순으로 작성
