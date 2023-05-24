@@ -415,23 +415,8 @@ class Timer {
 // #region game
 type DOM = Record<string, HTMLBodyElement>
 type Keybind = Record<string, string>
-// eslint-disable-next-line no-unused-vars
 type Notes = Record<string, (expectedTime: number, additionalData: AdditionalData) => Note>
 type Judgements = Judgement[]
-
-interface GameParams {
-    DOM?: DOM
-    keybind?: Keybind
-    notes?: Notes
-    judgements?: Judgements
-    maxScore?: number
-    delay?: number
-    sizePerBeat?: number | string
-    laneSizeRatio?: number
-    judgementPosition?: number
-    update?: (judgementData: JudgementData) => void
-    end?: (judgementData: JudgementData) => void
-}
 
 interface JudgementData {
     score: number
@@ -443,7 +428,42 @@ interface JudgementData {
     }
 }
 
+interface GameEventParams {
+    input?: {
+        'keydown'?: (game: Game, laneName: string) => void
+        'keyup'?: (game: Game, laneName: string) => void
+    },
+    play?: (game: Game, song: Song, mode: string) => void
+    load?: (game: Game, note: Note) => void
+    judge?: (game: Game, judgementData: JudgementData) => void
+    end?: (game: Game, judgementData: JudgementData) => void
+}
+
+interface GameEvent extends GameEventParams {
+    input: {
+        'keydown'?: (game: Game, laneName: string) => void
+        'keyup'?: (game: Game, laneName: string) => void
+    },
+    play: (game: Game, song: Song, mode: string) => void
+    load: (game: Game, note: Note) => void
+    judge: (game: Game, judgementData: JudgementData) => void
+    end: (game: Game, judgementData: JudgementData) => void
+}
+
 type ActualChart = Record<string, string>
+
+interface GameParams {
+    DOM?: DOM
+    keybind?: Keybind
+    notes?: Notes
+    judgements?: Judgements
+    maxScore?: number
+    delay?: number
+    sizePerBeat?: number | string
+    laneSizeRatio?: number
+    judgementPosition?: number
+    event?: GameEventParams
+}
 
 class Game {
     public DOM: DOM
@@ -455,8 +475,7 @@ class Game {
     public sizePerBeat: string
     #laneSizeRatio: number
     public judgementPosition: number
-    public update: (judgementData: JudgementData) => void
-    public end: (judgementData: JudgementData) => void
+    public event: GameEvent
 
     private expectedTime: Timer = new Timer()
     private actualTime: Timer = new Timer()
@@ -483,22 +502,6 @@ class Game {
     }
 
     // #region judge
-    private initJudge() {
-        const data = this.judgementData
-
-        data.score = 0
-        data.combo = 0
-        data.maxCombo = 0
-        data.lastJudgement = 'none'
-
-        for (const judgement of this.judgements) {
-            data.judgements[judgement.name] = 0
-        }
-        data.judgements.miss = 0
-
-        this.sendJudgeToDOM()
-    }
-
     private sendJudgeToDOM() {
         const DOM = this.DOM
         const data = this.judgementData
@@ -515,6 +518,22 @@ class Game {
         }
     }
 
+    private initJudge() {
+        const data = this.judgementData
+
+        data.score = 0
+        data.combo = 0
+        data.maxCombo = 0
+        data.lastJudgement = 'none'
+
+        for (const judgement of this.judgements) {
+            data.judgements[judgement.name] = 0
+        }
+        data.judgements.miss = 0
+
+        this.event.judge(this, data)
+    }
+
     private setJudge(judgement: Judgement) {
         const data = this.judgementData
         data.judgements[judgement.name]++
@@ -526,8 +545,7 @@ class Game {
         else data.combo = 0
         data.lastJudgement = judgement.name
 
-        this.sendJudgeToDOM()
-        this.update(this.judgementData)
+        this.event.judge(this, data)
     }
 
     public judgeLane(laneName: string, eventName: EventName, actualTime = this.actualTime.getTime()) {
@@ -577,21 +595,29 @@ class Game {
     private setKeyBind(actualChart: ActualChart) {
         for (const laneName in actualChart) {
             this.isPressed[laneName] = false
-
-            window.addEventListener('keydown', (event) => {
-                if (!(event.key in this.keybind) || this.isPressed[event.key]) return
-
-                this.isPressed[event.key] = true
-                this.judgeLane(this.keybind[event.key], 'keydown')
-            })
-
-            window.addEventListener('keyup', (event) => {
-                if (!(event.key in this.keybind)) return
-
-                this.isPressed[event.key] = false
-                this.judgeLane(this.keybind[event.key], 'keyup')
-            })
         }
+
+        window.addEventListener('keydown', (event) => {
+            if (!(event.key in this.keybind) || this.isPressed[event.key]) return
+
+            this.isPressed[event.key] = true
+            this.judgeLane(this.keybind[event.key], 'keydown')
+
+            if (this.event.input['keydown']) {
+                this.event.input['keydown'](this, this.keybind[event.key])
+            }
+        })
+
+        window.addEventListener('keyup', (event) => {
+            if (!(event.key in this.keybind)) return
+
+            this.isPressed[event.key] = false
+            this.judgeLane(this.keybind[event.key], 'keyup')
+
+            if (this.event.input['keyup']) {
+                this.event.input['keyup'](this, this.keybind[event.key])
+            }
+        })
     }
 
     private fadeMusic() {
@@ -636,7 +662,7 @@ class Game {
         if (index === Object.values(actualChart)[0].length) {
             this.fadeMusic()
             setTimeout(() => {
-                this.end(this.judgementData)
+                this.event.end(this, this.judgementData)
             }, moveTime + timePerBeat + this.judgements[this.judgements.length - 1].time)
             return
         }
@@ -663,6 +689,8 @@ class Game {
                         this.setJudge(Judgement.miss)
                     }
                 }, judgeTime + worstJudgement.time)
+
+                this.event.load(this, note)
             }
         }
 
@@ -698,13 +726,18 @@ class Game {
             this.music.play()
         }, judgeTime + this.delay + song.info.delay - this.expectedTime.getTime())
 
-        console.log(`${song.info.title} start`)
+        this.event.play(this, song, mode)
     }
     // #endregion
 
     public constructor({
+        // must be specified
         DOM = {},
         keybind = {},
+        sizePerBeat = '100px',
+        laneSizeRatio = 8,
+
+        // additional options
         notes = {
             n: (expectedTime) => new Tap(expectedTime),
             l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
@@ -720,30 +753,38 @@ class Game {
         ],
         maxScore = 100000,
         delay = 0,
-        sizePerBeat = '100px',
-        laneSizeRatio = 8,
         judgementPosition = 0,
-        update = (judgementData: JudgementData) => {
-            console.log(judgementData)
-        },
-        end = (judgementData: JudgementData) => {
-            console.log(judgementData)
-        }
+        event = {}
     }: GameParams = {}) {
+        // must be specified
         this.DOM = DOM
         this.keybind = keybind
-        this.notes = notes
-        this.judgements = judgements.sort((j1, j2) => j1.time - j2.time)
-        this.maxScore = maxScore
-        this.delay = delay
         if (typeof sizePerBeat === 'number') sizePerBeat = sizePerBeat + 'px'
         this.sizePerBeat = sizePerBeat
         this.#laneSizeRatio = laneSizeRatio
         this.laneSizeRatio = laneSizeRatio
+
+        // additional options
+        this.notes = notes
+        this.judgements = judgements.sort((j1, j2) => j1.time - j2.time)
+        this.maxScore = maxScore
+        this.delay = delay
         if (judgementPosition < 0 || judgementPosition > 1) throw new Error('The value of judgementPosition must be between 0 and 1.')
         this.judgementPosition = judgementPosition
-        this.update = update
-        this.end = end
+        this.event = {
+            input: {},
+            play: (game, song, mode) => {
+                console.log(`${song.info.title} ${mode} start`)
+            },
+            load: () => {},
+            judge: () => {
+                this.sendJudgeToDOM()
+            },
+            end: (game: Game, judgementData: JudgementData) => {
+                console.log(JSON.stringify(judgementData))
+            },
+            ...event
+        }
     }
 }
 // #endregion

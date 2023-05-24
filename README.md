@@ -107,20 +107,15 @@ const myOwnSong = new Song({
     info: {
         music: './music/song.mp3',
         title: 'music title',
-        artist: 'artist',
         
         bpm: 120,
         split: 16,
-        difficulty: {
-            easy: 3,
-            hard: 5
-        },
 
-        cover: './cover/img.png',
         background: './background/img.png',
         design: { /* anything you want to put ex) main color */ }
     },
     chart: {
+        // | is only for convenience of dividing beats, and has no role
         easy: [
             {
                 lane1: 'n***|****|****|****|n***|****|****|****',
@@ -153,7 +148,7 @@ const myOwnSong = new Song({
 })
 ```
 
-#### Play Game
+#### Play game
 
 ```js
 myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */ )
@@ -167,33 +162,12 @@ myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */ )
 
 ### Advanced
 
-#### Custom notes
-
-```js
-class MyCustomNote extends Flick {
-    constructor(lane, index, {
-        classNames = ['note', 'normal', 'tap', 'flick', 'up'],
-        moveAnimation = 'flickMove',
-        fadeAnimation = 'flickFade',
-        timingFunction = 'linear',
-        sizeRatio = 0.2
-    } = {}) {
-        super(lane, index, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        })
-    }
-}
-```
-
 #### Additional game options
 
 ```js
-const myRhythmGame = new Game({
-    DOM: { ... },
+const game = new Game({
+    ... /* Parameters that must be specified */,
+    // bind characters in chart
     notes: {
         n: (expectedTime) => new Tap(expectedTime),
         l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
@@ -203,7 +177,7 @@ const myRhythmGame = new Game({
         c: (expectedTime, additionalData) => new MyCustomNote(expectedTime, additionalData)
     }
     judgements: [
-        // new Judgement(name, time, isCombo)
+        // new Judgement(name, time, scoreRatio, isCombo)
         new Judgement('amazing', 50, 1, true),
         new Judgement('wow', 100, 0.5, true),
         new Judgement('umm', 50, 0.3, false)
@@ -211,20 +185,86 @@ const myRhythmGame = new Game({
     ],
     maxScore: 1000,
     delay: 500,
-    sizePerBeat: ...,
-    laneSizeRaio: ...,
-    update: (judgementData) => {
-        if (judgementData.combo === 0) console.log('oh, no!')
-    },
-    end: (judgementData) => {
-        if (judgementData.judgements.miss === 0) console.log('wow')
+    // 0 is the end point of the lane, and 1 is the start point of the lane
+    judgementPosition: 0.2,
+    event: {
+        input: {
+            keydown: (game, laneName) => {
+                // something you want to execute when the player presses down a key which is bound to a specific lane
+            },
+            keyup: (game, laneName) => {
+                // something you want to execute when the player presses up a key which is bound to a specific lane
+            }
+        },
+        play: (game, song, mode) => {
+            // something you want to execute when game.play() is called
+        },
+        load: (game, note) => {
+            // something you want to execute when notes are loaded
+        },
+        judge: (game, judgementData) => {
+            //default value: this.sendJudgeToDOM()
+            // something you want to execute when judgementData is changed
+
+            // `IMPORTANT` If you define this method as your own, score, lastJudgement, and combo would not automatically displayed in game.DOM.score, game.DOM.judgement, and game.DOM.combo
+        },
+        end: (game, judgementData) => {
+            // something you want to execute when the game is ended
+        }
     }
-})
+```
+
+(The values written in the code are examples only, not the default values)
+
+You may assign additional game options after creating an instance 
+
+```js
+const game = new Game(...)
+game.event.input.keydown = (game, laneName) => {
+    // something you want to execute when the player presses down a key which is bound to a specific lane
+}
+```
+
+#### Things to help with making charts
+
+you can pass beat as third argument of game.play
+
+```js
+const game = new Game()
+game.play(song, mode, beat)
+// the song would be played starting from beat
 ```
 
 ### Design Tips
 
-#### use transition to use GPU
+#### Use transition for GPU render
+
+```css
+/* use */
+@keyframes move {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(var(--lane-size)); }
+}
+
+/* DO NOT use */
+@keyframes move {
+    0% { top: 0; }
+    100% { top: var(--lane-size); }
+}
+```
+
+[Information about CSS GPU animation](https://www.smashingmagazine.com/2016/12/gpu-animation-doing-it-right/)
+
+#### Use multiple game instances to make multiplayer rhythm game
+
+```js
+const instance1 = new Game(...)
+const instance2 = new Game(...) // with different args
+
+instance1.play(song, mode)
+song.info.volume = 0
+instance2.play(song, mode)
+```
 
 ### Examples
 

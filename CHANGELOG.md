@@ -1,4 +1,7 @@
-## 0.8.1
+## 0.9.0
+- `MAIN UPDATE` game.event created for user custom event
+
+## 0.8.2
 - `FIXED` music play time
 - `FIXED` when play with different index
 - `FIXED` startFrom was second but fixed into ms

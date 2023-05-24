@@ -285,8 +285,7 @@ class Game {
     sizePerBeat;
     #laneSizeRatio;
     judgementPosition;
-    update;
-    end;
+    event;
     expectedTime = new Timer();
     actualTime = new Timer();
     scorePerNote = 0;
@@ -308,18 +307,6 @@ class Game {
         return this.#laneSizeRatio;
     }
     // #region judge
-    initJudge() {
-        const data = this.judgementData;
-        data.score = 0;
-        data.combo = 0;
-        data.maxCombo = 0;
-        data.lastJudgement = 'none';
-        for (const judgement of this.judgements) {
-            data.judgements[judgement.name] = 0;
-        }
-        data.judgements.miss = 0;
-        this.sendJudgeToDOM();
-    }
     sendJudgeToDOM() {
         const DOM = this.DOM;
         const data = this.judgementData;
@@ -334,6 +321,18 @@ class Game {
             DOM.combo.textContent = data.combo.toString();
         }
     }
+    initJudge() {
+        const data = this.judgementData;
+        data.score = 0;
+        data.combo = 0;
+        data.maxCombo = 0;
+        data.lastJudgement = 'none';
+        for (const judgement of this.judgements) {
+            data.judgements[judgement.name] = 0;
+        }
+        data.judgements.miss = 0;
+        this.event.judge(this, data);
+    }
     setJudge(judgement) {
         const data = this.judgementData;
         data.judgements[judgement.name]++;
@@ -345,8 +344,7 @@ class Game {
         else
             data.combo = 0;
         data.lastJudgement = judgement.name;
-        this.sendJudgeToDOM();
-        this.update(this.judgementData);
+        this.event.judge(this, data);
     }
     judgeLane(laneName, eventName, actualTime = this.actualTime.getTime()) {
         if (!this.createdNotes[laneName])
@@ -393,19 +391,25 @@ class Game {
     setKeyBind(actualChart) {
         for (const laneName in actualChart) {
             this.isPressed[laneName] = false;
-            window.addEventListener('keydown', (event) => {
-                if (!(event.key in this.keybind) || this.isPressed[event.key])
-                    return;
-                this.isPressed[event.key] = true;
-                this.judgeLane(this.keybind[event.key], 'keydown');
-            });
-            window.addEventListener('keyup', (event) => {
-                if (!(event.key in this.keybind))
-                    return;
-                this.isPressed[event.key] = false;
-                this.judgeLane(this.keybind[event.key], 'keyup');
-            });
         }
+        window.addEventListener('keydown', (event) => {
+            if (!(event.key in this.keybind) || this.isPressed[event.key])
+                return;
+            this.isPressed[event.key] = true;
+            this.judgeLane(this.keybind[event.key], 'keydown');
+            if (this.event.input['keydown']) {
+                this.event.input['keydown'](this, this.keybind[event.key]);
+            }
+        });
+        window.addEventListener('keyup', (event) => {
+            if (!(event.key in this.keybind))
+                return;
+            this.isPressed[event.key] = false;
+            this.judgeLane(this.keybind[event.key], 'keyup');
+            if (this.event.input['keyup']) {
+                this.event.input['keyup'](this, this.keybind[event.key]);
+            }
+        });
     }
     fadeMusic() {
         if (this.music.volume < 0.1) {
@@ -444,7 +448,7 @@ class Game {
         if (index === Object.values(actualChart)[0].length) {
             this.fadeMusic();
             setTimeout(() => {
-                this.end(this.judgementData);
+                this.event.end(this, this.judgementData);
             }, moveTime + timePerBeat + this.judgements[this.judgements.length - 1].time);
             return;
         }
@@ -468,6 +472,7 @@ class Game {
                         this.setJudge(Judgement.miss);
                     }
                 }, judgeTime + worstJudgement.time);
+                this.event.load(this, note);
             }
         }
         beat++;
@@ -497,10 +502,14 @@ class Game {
         setTimeout(() => {
             this.music.play();
         }, judgeTime + this.delay + song.info.delay - this.expectedTime.getTime());
-        console.log(`${song.info.title} start`);
+        this.event.play(this, song, mode);
     }
     // #endregion
-    constructor({ DOM = {}, keybind = {}, notes = {
+    constructor({ 
+    // must be specified
+    DOM = {}, keybind = {}, sizePerBeat = '100px', laneSizeRatio = 8, 
+    // additional options
+    notes = {
         n: (expectedTime) => new Tap(expectedTime),
         l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
         d: (expectedTime) => new Drag(expectedTime),
@@ -511,27 +520,37 @@ class Game {
         new Judgement('great', 80, 0.75, true),
         new Judgement('good', 100, 0.5, true),
         new Judgement('bad', 200, 0.25, false)
-    ], maxScore = 100000, delay = 0, sizePerBeat = '100px', laneSizeRatio = 8, judgementPosition = 0, update = (judgementData) => {
-        console.log(judgementData);
-    }, end = (judgementData) => {
-        console.log(judgementData);
-    } } = {}) {
+    ], maxScore = 100000, delay = 0, judgementPosition = 0, event = {} } = {}) {
+        // must be specified
         this.DOM = DOM;
         this.keybind = keybind;
-        this.notes = notes;
-        this.judgements = judgements.sort((j1, j2) => j1.time - j2.time);
-        this.maxScore = maxScore;
-        this.delay = delay;
         if (typeof sizePerBeat === 'number')
             sizePerBeat = sizePerBeat + 'px';
         this.sizePerBeat = sizePerBeat;
         this.#laneSizeRatio = laneSizeRatio;
         this.laneSizeRatio = laneSizeRatio;
+        // additional options
+        this.notes = notes;
+        this.judgements = judgements.sort((j1, j2) => j1.time - j2.time);
+        this.maxScore = maxScore;
+        this.delay = delay;
         if (judgementPosition < 0 || judgementPosition > 1)
             throw new Error('The value of judgementPosition must be between 0 and 1.');
         this.judgementPosition = judgementPosition;
-        this.update = update;
-        this.end = end;
+        this.event = {
+            input: {},
+            play: (game, song, mode) => {
+                console.log(`${song.info.title} ${mode} start`);
+            },
+            load: () => { },
+            judge: () => {
+                this.sendJudgeToDOM();
+            },
+            end: (game, judgementData) => {
+                console.log(JSON.stringify(judgementData));
+            },
+            ...event
+        };
     }
 }
 // #endregion

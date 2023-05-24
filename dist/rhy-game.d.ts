@@ -97,6 +97,36 @@ type DOM = Record<string, HTMLBodyElement>;
 type Keybind = Record<string, string>;
 type Notes = Record<string, (expectedTime: number, additionalData: AdditionalData) => Note>;
 type Judgements = Judgement[];
+interface JudgementData {
+    score: number;
+    combo: number;
+    maxCombo: number;
+    lastJudgement: string;
+    judgements: {
+        [judgementName: string]: number;
+    };
+}
+interface GameEventParams {
+    input?: {
+        'keydown'?: (game: Game, laneName: string) => void;
+        'keyup'?: (game: Game, laneName: string) => void;
+    };
+    play?: (game: Game, song: Song, mode: string) => void;
+    load?: (game: Game, note: Note) => void;
+    judge?: (game: Game, judgementData: JudgementData) => void;
+    end?: (game: Game, judgementData: JudgementData) => void;
+}
+interface GameEvent extends GameEventParams {
+    input: {
+        'keydown'?: (game: Game, laneName: string) => void;
+        'keyup'?: (game: Game, laneName: string) => void;
+    };
+    play: (game: Game, song: Song, mode: string) => void;
+    load: (game: Game, note: Note) => void;
+    judge: (game: Game, judgementData: JudgementData) => void;
+    end: (game: Game, judgementData: JudgementData) => void;
+}
+type ActualChart = Record<string, string>;
 interface GameParams {
     DOM?: DOM;
     keybind?: Keybind;
@@ -107,19 +137,8 @@ interface GameParams {
     sizePerBeat?: number | string;
     laneSizeRatio?: number;
     judgementPosition?: number;
-    update?: (judgementData: JudgementData) => void;
-    end?: (judgementData: JudgementData) => void;
+    event?: GameEventParams;
 }
-interface JudgementData {
-    score: number;
-    combo: number;
-    maxCombo: number;
-    lastJudgement: string;
-    judgements: {
-        [judgementName: string]: number;
-    };
-}
-type ActualChart = Record<string, string>;
 declare class Game {
     #private;
     DOM: DOM;
@@ -130,8 +149,7 @@ declare class Game {
     delay: number;
     sizePerBeat: string;
     judgementPosition: number;
-    update: (judgementData: JudgementData) => void;
-    end: (judgementData: JudgementData) => void;
+    event: GameEvent;
     private expectedTime;
     private actualTime;
     private scorePerNote;
@@ -141,8 +159,8 @@ declare class Game {
     readonly judgementData: JudgementData;
     set laneSizeRatio(ratio: number);
     get laneSizeRatio(): number;
-    private initJudge;
     private sendJudgeToDOM;
+    private initJudge;
     private setJudge;
     judgeLane(laneName: string, eventName: EventName, actualTime?: number): void;
     private getActualChart;
@@ -151,6 +169,6 @@ declare class Game {
     private countNote;
     private loadNote;
     play(song: Song, mode: string, index?: number): void;
-    constructor({ DOM, keybind, notes, judgements, maxScore, delay, sizePerBeat, laneSizeRatio, judgementPosition, update, end }?: GameParams);
+    constructor({ DOM, keybind, sizePerBeat, laneSizeRatio, notes, judgements, maxScore, delay, judgementPosition, event }?: GameParams);
 }
 //# sourceMappingURL=rhy-game.d.ts.map
