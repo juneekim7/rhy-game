@@ -1,3 +1,6 @@
+## 0.9.1
+- `CHANGED` game.event.judge gets judgedNote by third argument
+
 ## 0.9.0
 - `MAIN UPDATE` game.event created for user custom event
 

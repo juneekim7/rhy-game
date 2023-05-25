@@ -24,6 +24,7 @@ declare abstract class Note {
     hasJudged: boolean;
     judgement: 'none' | Judgement;
     count: number;
+    private noteDOM;
     createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number): void;
     judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
@@ -113,7 +114,7 @@ interface GameEventParams {
     };
     play?: (game: Game, song: Song, mode: string) => void;
     load?: (game: Game, note: Note) => void;
-    judge?: (game: Game, judgementData: JudgementData) => void;
+    judge?: (game: Game, judgementData: JudgementData, judgedNote: Note | null) => void;
     end?: (game: Game, judgementData: JudgementData) => void;
 }
 interface GameEvent extends GameEventParams {
@@ -123,7 +124,7 @@ interface GameEvent extends GameEventParams {
     };
     play: (game: Game, song: Song, mode: string) => void;
     load: (game: Game, note: Note) => void;
-    judge: (game: Game, judgementData: JudgementData) => void;
+    judge: (game: Game, judgementData: JudgementData, judgedNote: Note | null) => void;
     end: (game: Game, judgementData: JudgementData) => void;
 }
 type ActualChart = Record<string, string>;

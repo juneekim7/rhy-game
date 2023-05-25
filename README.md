@@ -202,7 +202,7 @@ const game = new Game({
         load: (game, note) => {
             // something you want to execute when notes are loaded
         },
-        judge: (game, judgementData) => {
+        judge: (game, judgementData, judgedNote) => {
             //default value: this.sendJudgeToDOM()
             // something you want to execute when judgementData is changed
 

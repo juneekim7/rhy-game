@@ -29,23 +29,23 @@ class Note {
     hasJudged;
     judgement;
     count;
+    noteDOM;
     createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
         if (this.hasJudged)
             return;
-        const noteDOM = document.createElement('div');
         for (const className of this.classNames) {
-            const currentClass = noteDOM.getAttribute('class') ?? '';
-            noteDOM.setAttribute('class', currentClass + ' ' + className);
+            const currentClass = this.noteDOM.getAttribute('class') ?? '';
+            this.noteDOM.setAttribute('class', currentClass + ' ' + className);
         }
-        noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`);
-        noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
-        noteDOM.addEventListener('animationend', () => {
-            noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
-            noteDOM.addEventListener('animationend', () => {
-                noteDOM.remove();
+        this.noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`);
+        this.noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
+        this.noteDOM.addEventListener('animationend', () => {
+            this.noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
+            this.noteDOM.addEventListener('animationend', () => {
+                this.noteDOM.remove();
             });
         });
-        laneDOM.appendChild(noteDOM);
+        laneDOM.appendChild(this.noteDOM);
     }
     judge(judgements, eventName, actualTime) {
         if (this.hasJudged)
@@ -74,6 +74,7 @@ class Note {
         this.hasJudged = false;
         this.judgement = 'none';
         this.count = 1;
+        this.noteDOM = document.createElement('div');
     }
 }
 // #region basic note
@@ -331,9 +332,9 @@ class Game {
             data.judgements[judgement.name] = 0;
         }
         data.judgements.miss = 0;
-        this.event.judge(this, data);
+        this.event.judge(this, data, null);
     }
-    setJudge(judgement) {
+    setJudge(judgement, judgedNote) {
         const data = this.judgementData;
         data.judgements[judgement.name]++;
         data.score += this.scorePerNote * judgement.scoreRatio;
@@ -344,7 +345,7 @@ class Game {
         else
             data.combo = 0;
         data.lastJudgement = judgement.name;
-        this.event.judge(this, data);
+        this.event.judge(this, data, judgedNote);
     }
     judgeLane(laneName, eventName, actualTime = this.actualTime.getTime()) {
         if (!this.createdNotes[laneName])
@@ -360,7 +361,7 @@ class Game {
         const judgement = note.judge(this.judgements, eventName, actualTime);
         if (judgement === 'none')
             return;
-        this.setJudge(judgement);
+        this.setJudge(judgement, this.createdNotes[laneName][0]);
         this.createdNotes[laneName].shift();
     }
     // #endregion
@@ -469,7 +470,7 @@ class Game {
                     }
                     if (!note.hasJudged) {
                         note.hasJudged = true;
-                        this.setJudge(Judgement.miss);
+                        this.setJudge(Judgement.miss, note);
                     }
                 }, judgeTime + worstJudgement.time);
                 this.event.load(this, note);
