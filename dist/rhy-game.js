@@ -153,7 +153,13 @@ class Long extends Note {
 // #endregion
 // #region basic mobile note
 class Tap extends Normal {
-    constructor(expectedTime, { classNames = ['note', 'normal', 'tap'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
+    judge(judgements, eventName, actualTime) {
+        if (eventName === 'touchstart')
+            return Note.prototype.judge.call(this, judgements, eventName, actualTime);
+        else
+            return super.judge(judgements, eventName, actualTime);
+    }
+    constructor(expectedTime, { classNames = ['note', 'normal'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
         super(expectedTime, {
             classNames,
             moveAnimation,
@@ -164,6 +170,15 @@ class Tap extends Normal {
     }
 }
 class Hold extends Long {
+    judge(judgements, eventName, actualTime) {
+        if (['touchstart', 'keydown'].includes(eventName) && !this.hasJudged) {
+            return Note.prototype.judge.call(this, judgements, eventName, actualTime);
+        }
+        else if (this.hasJudged)
+            return Judgement.miss;
+        else
+            return 'none';
+    }
     constructor(expectedTime, longRequiredData, { classNames = ['note', 'long', 'hold'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
         super(expectedTime, longRequiredData, {
             classNames,
@@ -172,6 +187,21 @@ class Hold extends Long {
             timingFunction,
             sizeRatio
         });
+        const { lane, index } = longRequiredData;
+        const noteChar = lane[index];
+        // 끝 노트
+        if (index + 1 < lane.length && lane[index + 1] !== noteChar) {
+            this.judge = (judgements, eventName, actualTime) => {
+                if (['touchend', 'keyup'].includes(eventName) && !this.hasJudged) {
+                    return Note.prototype.judge.call(this, judgements, eventName, actualTime);
+                }
+                else if (this.hasJudged) {
+                    return 'none';
+                }
+                else
+                    return Judgement.miss;
+            };
+        }
     }
 }
 // #endregion
@@ -389,29 +419,6 @@ class Game {
         }
         return actualChart;
     }
-    setKeyBind(actualChart) {
-        for (const laneName in actualChart) {
-            this.isPressed[laneName] = false;
-        }
-        window.addEventListener('keydown', (event) => {
-            if (!(event.key in this.keybind) || this.isPressed[event.key])
-                return;
-            this.isPressed[event.key] = true;
-            this.judgeLane(this.keybind[event.key], 'keydown');
-            if (this.event.input['keydown']) {
-                this.event.input['keydown'](this, this.keybind[event.key]);
-            }
-        });
-        window.addEventListener('keyup', (event) => {
-            if (!(event.key in this.keybind))
-                return;
-            this.isPressed[event.key] = false;
-            this.judgeLane(this.keybind[event.key], 'keyup');
-            if (this.event.input['keyup']) {
-                this.event.input['keyup'](this, this.keybind[event.key]);
-            }
-        });
-    }
     fadeMusic() {
         if (this.music.volume < 0.1) {
             this.music.pause();
@@ -481,6 +488,47 @@ class Game {
             this.loadNote(actualChart, timePerBeat, startIndex, beat);
         }, timePerBeat * beat - this.expectedTime.getTime());
     }
+    // #region setting
+    setKeyBind(actualChart) {
+        for (const laneName in actualChart) {
+            this.isPressed[laneName] = false;
+        }
+        window.addEventListener('keydown', (event) => {
+            if (!(event.key in this.keybind) || this.isPressed[event.key])
+                return;
+            this.isPressed[event.key] = true;
+            this.judgeLane(this.keybind[event.key], 'keydown');
+            if (this.event.input['keydown']) {
+                this.event.input['keydown'](this, this.keybind[event.key]);
+            }
+        });
+        window.addEventListener('keyup', (event) => {
+            if (!(event.key in this.keybind))
+                return;
+            this.isPressed[event.key] = false;
+            this.judgeLane(this.keybind[event.key], 'keyup');
+            if (this.event.input['keyup']) {
+                this.event.input['keyup'](this, this.keybind[event.key]);
+            }
+        });
+    }
+    setTouch(actualChart) {
+        for (const laneName in actualChart) {
+            if (!(laneName in this.DOM))
+                continue;
+            this.DOM[laneName].addEventListener('touchstart', () => {
+                this.judgeLane(laneName, 'touchstart');
+            });
+            this.DOM[laneName].addEventListener('touchend', () => {
+                this.judgeLane(laneName, 'touchend');
+            });
+        }
+    }
+    setEvent(actualChart) {
+        this.setKeyBind(actualChart);
+        this.setTouch(actualChart);
+    }
+    // #endregion
     play(song, mode, index = 0) {
         if (!(mode in song.chart))
             throw new Error(`there is no mode '${mode}' in '${song.info.title}'`);
@@ -488,7 +536,7 @@ class Game {
         const judgeTime = moveTime * (1 - this.judgementPosition);
         const actualChart = this.getActualChart(song, mode);
         this.initJudge();
-        this.setKeyBind(actualChart);
+        this.setEvent(actualChart);
         this.scorePerNote = this.maxScore / this.countNote(actualChart);
         this.expectedTime = new Timer();
         this.actualTime = new Timer(judgeTime);
@@ -543,6 +591,7 @@ class Game {
             play: (game, song, mode) => {
                 console.log(`${song.info.title} ${mode} start`);
             },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             load: () => { },
             judge: () => {
                 this.sendJudgeToDOM();

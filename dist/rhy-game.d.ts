@@ -44,9 +44,11 @@ declare class Long extends Note {
     constructor(expectedTime: number, longRequiredData: LongRequiredData, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
 declare class Tap extends Normal {
+    judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
 declare class Hold extends Long {
+    judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, longRequiredData: LongRequiredData, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
 declare class Drag extends Tap {
@@ -165,10 +167,12 @@ declare class Game {
     private setJudge;
     judgeLane(laneName: string, eventName: EventName, actualTime?: number): void;
     private getActualChart;
-    private setKeyBind;
     private fadeMusic;
     private countNote;
     private loadNote;
+    private setKeyBind;
+    private setTouch;
+    private setEvent;
     play(song: Song, mode: string, index?: number): void;
     constructor({ DOM, keybind, sizePerBeat, laneSizeRatio, notes, judgements, maxScore, delay, judgementPosition, event }?: GameParams);
 }

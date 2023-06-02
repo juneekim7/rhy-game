@@ -1,3 +1,8 @@
+## 0.9.2
+- `ADDED` Touch event
+- `ADDED` Tap class
+- `ADDED` Hold class
+
 ## 0.9.1
 - `CHANGED` game.event.judge gets judgedNote by third argument
 
