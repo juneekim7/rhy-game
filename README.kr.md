@@ -395,13 +395,13 @@ instance2.play(song, mode)
 
 ### 예시
 
-#### Normal
+#### 리아노 타일
 
 <p align="center">
-    <img src="./examples/images/normal.gif" style="height: 60vh;" />
+    <img src="./examples/images/riano tiles.gif" style="height: 60vh;" />
 </p>
 
-[코드 보기](./examples/games/normal.html)
+[코드 보기](./examples/games/riano tiles.html)
 
 #### Deltria
 
@@ -435,7 +435,7 @@ instance2.play(song, mode)
 
 [코드 보기](./examples/games/rytus.html)
 
-#### RTCTC
+#### 리;듬칫듬칫
 
 <p align="center">
     <img src="./examples/images/rtctc.gif" style="height: 60vh;" />

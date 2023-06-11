@@ -399,13 +399,13 @@ instance2.play(song, mode)
 
 ### Examples
 
-#### Normal
+#### Riano tiles
 
 <p align="center">
-    <img src="./examples/images/normal.gif" style="height: 60vh;" />
+    <img src="./examples/images/riano tiles.gif" style="height: 60vh;" />
 </p>
 
-[view code](./examples/games/normal.html)
+[view code](./examples/games/riano tiles.html)
 
 #### Deltria
 
