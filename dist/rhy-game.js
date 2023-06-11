@@ -566,9 +566,21 @@ class Game {
     }
 }
 // #endregion
-// export {
-//     Judgement,
-//     Note, Normal, Long,
-//     Tap, Hold, Drag, Flick, HoldFlick,
-//     Song, Game
-// }
+if (typeof define !== 'function' && define.amd) {
+    define([], function() {
+        return {
+            Judgement,
+            Note, Normal, Long,
+            Tap, Hold,
+            Song, Game
+        };
+    });
+}
+if (typeof exports !== 'undefined') {
+    exports = {
+        Judgement,
+        Note, Normal, Long,
+        Tap, Hold,
+        Song, Game
+    };
+}

@@ -52,8 +52,6 @@ Most rhythm games have similar features and mechanism except for design, details
 npm i rhy-game
 ```
 
-For typescript:
-
 ```bash
 npm i --save-dev @types/rhy-game
 ```
@@ -64,10 +62,20 @@ Or:
 git clone https://github.com/juneekim7/rhy-game.git
 ```
 
-In browser:
+In the browser:
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/juneekim7/rhy-game@main/dist/rhy-game.min.js"></script>
+```
+
+As a dependency:
+
+```js
+import { Game } from 'rhy-game'
+```
+
+```js
+const { Game } = require('rhy-game')
 ```
 
 ### Quick Start
