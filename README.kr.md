@@ -137,25 +137,24 @@ const myRhythmGame = new Game({
 const myOwnSong = new Song({
     info: {
         music: './music/song.mp3',
-        title: 'music title',
         
-        bpm: 120,
+        bpm: 132,
         split: 16
     },
     chart: {
         // | 는 채보 노트를 나눠 제작자의 편의를 위해 존재할 뿐, 아무 기능도 없음
         mode1: [
             {
-                lane1: 'nn**|n*n*|****|****|nn**|n*n*|****|****',
-                lane2: '**ll|****|llll|llll|**ll|****|llll|llll',
-                lane3: '****|ll**|nnnn|llll|****|ll**|****|llll',
-                lane4: '*n*n|n*n*|****|****|*n*n|n*n*|****|****'
+                lane1: '|****|***|****|s***|',
+                lane2: '|****|***|***s|*s**|',
+                lane3: '|****|***|**s*|****|',
+                lane4: '|****|***|*s**|****|'
             },
             {
-                lane1: '****|****|llll|llll|****|****|llll|llll',
-                lane2: 'n***|n*n*|****|****|n***|n*n*|****|****',
-                lane3: '****|n*n*|****|****|****|n*n*|****|****',
-                lane4: '****|****|****|llll|****|****|****|llll'
+                lane1: '||***s|s***|****|****||***s|s***|****|****||****|**s*|lll*|****||****|**s*|lll*|****||',
+                lane2: '||**s*|**s*|s***|****||**s*|**s*|s***|****||****|s***|****|****||****|s***|***s|****||',
+                lane3: '||*s**|s***|**s*|s***||*s**|s***|**s*|**s*||**s*|****|****|**s*||**s*|****|****|****||',
+                lane4: '||s***|****|s***|**s*||s***|****|s***|s***||s***|****|***s|****||s***|****|****|****||'
             }
         ]
     }
@@ -405,7 +404,7 @@ instance2.play(song, mode)
     <img src="./examples/images/riano tiles.gif" style="height: 60vh;" />
 </p>
 
-[코드 보기](./examples/games/riano tiles.html)
+[코드 보기](./examples/games/riano%20tiles.html)
 
 #### Deltria
 

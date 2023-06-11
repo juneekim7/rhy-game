@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>riano tiles</title>
+    <link href="./riano tiles.css" rel="stylesheet">
+    <script src="../../dist/rhy-game.js"></script>
+</head>
+<body>
+    <div id="judgementData">
+        <div id="combo">0</div>
+    </div>
+
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+
+    <script src="./play.js"></script>
+    <script>
+        game.sizePerBeat = '25vh'
+        game.laneSizeRatio = 4
+        game.judgementPosition = 0
+
+        game.notes.s = (expectedTime) => new Tap(expectedTime, { sizeRatio: 1 })
+    </script>
+</body>
+</html>
