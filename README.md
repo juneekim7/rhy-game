@@ -6,9 +6,9 @@
 
 ## Description
 
-"make your own web rhythm game easily!"
+"Make your own web rhythm game easily!"
 
-Most rhythm games have similar features and mechanism except for design, details, and a bit of personality. Using rhy-game can help you to make your own note-based web rhythm game easily. Since your game is on the web, it will be lightweight and accessible to people.
+Most rhythm games have similar features and mechanism except for design, details, and a bit of personality. With rhy-game, you can make your own note-based web rhythm game. Since your game is on the web, it will be lightweight and accessible to people.
 
 ### Features
 
