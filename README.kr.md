@@ -48,12 +48,6 @@
 npm i rhy-game
 ```
 
-typescript를 위해:
-
-```bash
-npm i --save-dev @types/rhy-game
-```
-
 또는:
 
 ```bash
@@ -64,6 +58,16 @@ git clone https://github.com/juneekim7/rhy-game.git
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/juneekim7/rhy-game@main/dist/rhy-game.min.js"></script>
+```
+
+의존성:
+
+```js
+import { Game } from 'rhy-game'
+```
+
+```js
+const { Game } = require('rhy-game')
 ```
 
 ### 튜토리얼

@@ -52,10 +52,6 @@ Most rhythm games have similar features and mechanism except for design, details
 npm i rhy-game
 ```
 
-```bash
-npm i --save-dev @types/rhy-game
-```
-
 Or:
 
 ```bash
