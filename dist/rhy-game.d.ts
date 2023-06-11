@@ -51,15 +51,6 @@ declare class Hold extends Long {
     judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, longRequiredData: LongRequiredData, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
-declare class Drag extends Tap {
-    constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
-}
-declare class Flick extends Tap {
-    constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
-}
-declare class HoldFlick extends Hold {
-    constructor(expectedTime: number, longRequiredData: LongRequiredData, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
-}
 type AdditionalData = LongRequiredData;
 declare class Info {
     readonly music: string;
@@ -99,7 +90,6 @@ declare class Timer {
 type DOM = Record<string, HTMLBodyElement>;
 type Keybind = Record<string, string>;
 type Notes = Record<string, (expectedTime: number, additionalData: AdditionalData) => Note>;
-type Judgements = Judgement[];
 interface JudgementData {
     score: number;
     combo: number;
@@ -134,7 +124,7 @@ interface GameParams {
     DOM?: DOM;
     keybind?: Keybind;
     notes?: Notes;
-    judgements?: Judgements;
+    judgements?: Judgement[];
     maxScore?: number;
     delay?: number;
     sizePerBeat?: number | string;
@@ -147,7 +137,7 @@ declare class Game {
     DOM: DOM;
     keybind: Keybind;
     notes: Notes;
-    judgements: Judgements;
+    judgements: Judgement[];
     maxScore: number;
     delay: number;
     sizePerBeat: string;

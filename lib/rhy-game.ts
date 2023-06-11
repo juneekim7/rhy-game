@@ -283,78 +283,7 @@ class Hold extends Long {
 }
 // #endregion
 
-// #region advanced note
-class Drag extends Tap {
-    public constructor(
-        expectedTime: number,
-        {
-            classNames = ['note', 'normal', 'tap', 'drag'],
-            moveAnimation = 'move',
-            fadeAnimation = 'fade',
-            timingFunction = 'linear',
-            sizeRatio = 0.1
-        }: NoteDOMParams = {}
-    ) {
-        super(expectedTime, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        })
-    }
-}
-
-class Flick extends Tap {
-    public constructor(
-        expectedTime: number,
-        {
-            classNames = ['note', 'normal', 'tap', 'flick'],
-            moveAnimation = 'move',
-            fadeAnimation = 'fade',
-            timingFunction = 'linear',
-            sizeRatio = 0.1
-        }: NoteDOMParams = {}
-    ) {
-        super(expectedTime, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        })
-    }
-}
-
-class HoldFlick extends Hold {
-    public constructor(
-        expectedTime: number,
-        longRequiredData: LongRequiredData,
-        {
-            classNames = ['note', 'long', 'hold', 'hold-flick'],
-            moveAnimation = 'move',
-            fadeAnimation = 'fade',
-            timingFunction = 'linear',
-            sizeRatio = 0.1
-        }: NoteDOMParams = {}
-    ) {
-        super(
-            expectedTime,
-            longRequiredData,
-            {
-                classNames,
-                moveAnimation,
-                fadeAnimation,
-                timingFunction,
-                sizeRatio
-            }
-        )
-    }
-}
-// #endregion
-
 type AdditionalData = LongRequiredData
-
 // #endregion
 
 // #region song
@@ -428,7 +357,6 @@ class Song {
 // #endregion
 
 // #region timer
-
 class Timer {
     private initTime: number
 
@@ -440,14 +368,12 @@ class Timer {
         this.initTime = new Date().getTime() + minusTime
     }
 }
-
 // #endregion
 
 // #region game
 type DOM = Record<string, HTMLBodyElement>
 type Keybind = Record<string, string>
 type Notes = Record<string, (expectedTime: number, additionalData: AdditionalData) => Note>
-type Judgements = Judgement[]
 
 interface JudgementData {
     score: number
@@ -487,7 +413,7 @@ interface GameParams {
     DOM?: DOM
     keybind?: Keybind
     notes?: Notes
-    judgements?: Judgements
+    judgements?: Judgement[]
     maxScore?: number
     delay?: number
     sizePerBeat?: number | string
@@ -500,7 +426,7 @@ class Game {
     public DOM: DOM
     public keybind: Keybind
     public notes: Notes
-    public judgements: Judgements
+    public judgements: Judgement[]
     public maxScore: number
     public delay: number
     public sizePerBeat: string
@@ -791,10 +717,7 @@ class Game {
         // additional options
         notes = {
             n: (expectedTime) => new Tap(expectedTime),
-            l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
-            d: (expectedTime) => new Drag(expectedTime),
-            f: (expectedTime) => new Flick(expectedTime),
-            x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
+            l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData)
         },
         judgements = [
             new Judgement('perfect', 40, 1, true),

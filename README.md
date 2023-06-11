@@ -41,6 +41,28 @@ Most rhythm games have similar features and mechanism except for design, details
 
 ### Download
 
+```bash
+npm i rhy-game
+```
+
+For typescript:
+
+```bash
+npm i --save-dev @types/rhy-game
+```
+
+Or:
+
+```bash
+git clone https://github.com/juneekim7/rhy-game.git
+```
+
+In browser:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/juneekim7/rhy-game@main/dist/rhy-game.min.js"></script>
+```
+
 ### Quick Start
 
 #### Make new game and bind HTML DOM elements
@@ -100,6 +122,8 @@ const myRhythmGame = new Game({
 }
 ```
 
+--lane-size and --size are automatically assigned values.
+
 #### Make your own song(chart)
 
 ```js
@@ -109,28 +133,11 @@ const myOwnSong = new Song({
         title: 'music title',
         
         bpm: 120,
-        split: 16,
-
-        background: './background/img.png',
-        design: { /* anything you want to put ex) main color */ }
+        split: 16
     },
     chart: {
         // | is only for convenience of dividing beats, and has no role
-        easy: [
-            {
-                lane1: 'n***|****|****|****|n***|****|****|****',
-                lane2: '****|****|n***|****|****|****|n***|****',
-                lane3: '****|****|****|n***|****|****|****|n***',
-                lane4: '****|n***|****|****|****|n***|****|****'
-            },
-            {
-                lane1: '****|****|n***|****|****|****|n***|****',
-                lane2: 'n***|****|****|****|n***|****|****|****',
-                lane3: '****|n***|****|****|****|n***|****|****',
-                lane4: '****|****|****|n***|****|****|****|n***'
-            }
-        ],
-        hard: [
+        mode1: [
             {
                 lane1: 'nn**|n*n*|****|****|nn**|n*n*|****|****',
                 lane2: '**ll|****|llll|llll|**ll|****|llll|llll',
@@ -151,7 +158,7 @@ const myOwnSong = new Song({
 #### Play game
 
 ```js
-myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */ )
+myRhythmGame.play(myOwnSong, 'mode1')
 ```
 
 #### Result
@@ -160,27 +167,26 @@ myRhythmGame.play(myOwnSong, 'hard' /* or 'easy' */ )
     <img src="./examples/images/quick start.gif" style="height: 60vh;" />
 </p>
 
-### Advanced
+### Options
 
-#### Additional game options
+The values written in the code are examples only, not the default values
+
+#### Game
 
 ```js
-const game = new Game({
+new Game({
     ... /* Parameters that must be specified */,
     // bind characters in chart
     notes: {
         n: (expectedTime) => new Tap(expectedTime),
         l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
-        d: (expectedTime) => new Drag(expectedTime),
-        f: (expectedTime) => new Flick(expectedTime),
-        x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData),
         c: (expectedTime, additionalData) => new MyCustomNote(expectedTime, additionalData)
     }
     judgements: [
         // new Judgement(name, time, scoreRatio, isCombo)
-        new Judgement('amazing', 50, 1, true),
-        new Judgement('wow', 100, 0.5, true),
-        new Judgement('umm', 50, 0.3, false)
+        new Judgement('perfect', 50, 1, true),
+        new Judgement('great', 100, 0.5, true),
+        new Judgement('bad', 50, 0.3, false)
         // miss is automatically generated
     ],
     maxScore: 1000,
@@ -214,14 +220,128 @@ const game = new Game({
     }
 ```
 
-(The values written in the code are examples only, not the default values)
+#### Judgement
 
-You may assign additional game options after creating an instance 
+```js
+// new Judgement(name, time, scoreRatio, isCombo)
+new Judgement('perfect', 50, 1, true)
+```
+
+#### Song
+
+```js
+new Song({
+    info: {
+        music: './music.mp3',
+        title: 'music title',
+        artist: 'artist',
+
+        difficulty: {
+            easy: 3,
+            hard: 5
+        },
+        volume: 0.6,
+        bpm: 120,
+        split: 16,
+        delay: 0,
+        startFrom: 0,
+
+        cover: './cover.png',
+        background: './background.png',
+
+        design: {
+            // Anything you want
+            // For example, mainColor
+        }
+    },
+    chart: {
+        easy: {
+            // chart
+        },
+        hard: {
+            //chart
+        }
+    }
+})
+```
+
+#### Note
+
+```js
+// new Note(expectedTime, noteDOMParams)
+// or
+// new Note(expectedTime, additionalData, noteDOMParams)
+new Short(100, {
+    classNames: ['note', 'short'],
+    moveAnimation: 'move',
+    fadeAnimation: 'fade',
+    timingFunction: 'linear',
+    sizeRatio: 0.1
+})
+
+new Long(100, {
+    lane: 'lane1',
+    index: 1,
+    timePerBeat: 50
+}, {
+    classNames: ['note', 'long'],
+    moveAnimation: 'move',
+    fadeAnimation: 'fade',
+    timingFunction: 'linear',
+    sizeRatio: 0.1
+})
+```
+
+### Advanced
+
+#### Assign additional game options after creating an instance 
 
 ```js
 const game = new Game(...)
 game.event.input.keydown = (game, laneName) => {
     // something you want to execute when the player presses down a key which is bound to a specific lane
+}
+```
+
+#### Make your own custom Notes
+
+```js
+class MyCustomNote extends Note {
+    createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
+        // method that creates DOM
+    }
+
+    judge(judgements, eventName, actualTime) {
+        if (/* right condition */) {
+            return Note.prototype.judge.call(this, judgements, eventName, actualTime)
+        }
+        else if (/* miss condition */) {
+            return Judgement.miss
+        }
+        else return 'none'
+    }
+
+    constructor(expectedTime, additionalData, {
+        classNames,
+        moveAnimation,
+        fadeAnimation,
+        timingFunction,
+        sizeRatio
+    }) {
+        super(
+            expectedTime,
+            additionalData,
+            {
+                classNames,
+                moveAnimation,
+                fadeAnimation,
+                timingFunction,
+                sizeRatio
+            }
+        )
+
+        //anything you want
+    }
 }
 ```
 
@@ -254,6 +374,10 @@ game.play(song, mode, beat)
 ```
 
 [Information about CSS GPU animation](https://www.smashingmagazine.com/2016/12/gpu-animation-doing-it-right/)
+
+#### Shorten the distance the note moves
+
+Most browsers only support up to 60 fps. If the distance the note moves is long, the animation would not be smooth.
 
 #### Use multiple game instances to make multiplayer rhythm game
 

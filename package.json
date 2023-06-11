@@ -1,11 +1,11 @@
 {
   "name": "rhy-game",
-  "version": "0.9.2",
+  "version": "1.0.1",
   "description": "make your own web rhythm game easily!",
-  "main": "dist/rhy-game.js",
-  "types": "dist/rhy-game.d.ts",
+  "main": "./dist/rhy-game.js",
+  "types": "./dist/rhy-game.d.ts",
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . -w",
     "minify": "uglifyjs ./dist/rhy-game.js -o ./dist/rhy-game.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,9 +22,7 @@
     "rhythm",
     "game",
     "rhygame",
-    "rhy-game",
-    "bms",
-    "bmson"
+    "rhy-game"
   ],
   "author": {
     "name": "Junee",
@@ -37,9 +35,10 @@
   },
   "homepage": "https://github.com/juneekim7/rhygame#readme",
   "devDependencies": {
+    "@types/node": "^20.3.0",
     "@typescript-eslint/eslint-plugin": "^5.59.5",
     "@typescript-eslint/parser": "^5.59.5",
     "eslint": "^8.40.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.3"
   }
 }

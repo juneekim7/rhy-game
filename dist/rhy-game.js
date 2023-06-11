@@ -205,41 +205,6 @@ class Hold extends Long {
     }
 }
 // #endregion
-// #region advanced note
-class Drag extends Tap {
-    constructor(expectedTime, { classNames = ['note', 'normal', 'tap', 'drag'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(expectedTime, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        });
-    }
-}
-class Flick extends Tap {
-    constructor(expectedTime, { classNames = ['note', 'normal', 'tap', 'flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(expectedTime, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        });
-    }
-}
-class HoldFlick extends Hold {
-    constructor(expectedTime, longRequiredData, { classNames = ['note', 'long', 'hold', 'hold-flick'], moveAnimation = 'move', fadeAnimation = 'fade', timingFunction = 'linear', sizeRatio = 0.1 } = {}) {
-        super(expectedTime, longRequiredData, {
-            classNames,
-            moveAnimation,
-            fadeAnimation,
-            timingFunction,
-            sizeRatio
-        });
-    }
-}
-// #endregion
 // #region song
 class Info {
     music;
@@ -560,10 +525,7 @@ class Game {
     // additional options
     notes = {
         n: (expectedTime) => new Tap(expectedTime),
-        l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
-        d: (expectedTime) => new Drag(expectedTime),
-        f: (expectedTime) => new Flick(expectedTime),
-        x: (expectedTime, additionalData) => new HoldFlick(expectedTime, additionalData)
+        l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData)
     }, judgements = [
         new Judgement('perfect', 40, 1, true),
         new Judgement('great', 80, 0.75, true),

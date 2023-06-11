@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>game-name</title>
+    <link href="./game-name.css" rel="stylesheet">
+    <script src="../../dist/rhy-game.js"></script>
+</head>
+<body>
+    <div id="judgementData">
+        score: <span id="score"></span> <br/>
+        combo: <span id="combo"></span> <br/>
+        <span id="judgement"></span>
+    </div>
+
+    <div id="line"></div>
+
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+
+    <script src="./play.js"></script>
+    <script>
+        game.DOM.lane5 = document.getElementsByClassName('lane')[4]
+        game.DOM.lane6 = document.getElementsByClassName('lane')[5]
+
+        game.sizePerBeat = '0vh'
+        game.laneSizeRatio = 8
+        game.judgementPosition = 0.2
+    </script>
+</body>
+</html>

@@ -1,3 +1,7 @@
+## 1.0.1
+- `MAIN UPDATE` Official released
+- `ADDED` Examples
+
 ## 0.9.2
 - `ADDED` Touch event
 - `ADDED` Tap class
