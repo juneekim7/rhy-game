@@ -1,4 +1,4 @@
-# rhy-game (incomplete project)
+# rhy-game
 
 ## Translation
 
@@ -38,6 +38,13 @@ Most rhythm games have similar features and mechanism except for design, details
 ## Documentation
 
 ### Contents
+
+- [Download](#download)
+- [Quick Start](#quick-start)
+- [Options](#options)
+- [Advanced](#advanced)
+- [Design Tips](#design-tips)
+- [Examples](#examples)
 
 ### Download
 
@@ -209,7 +216,7 @@ new Game({
             // something you want to execute when notes are loaded
         },
         judge: (game, judgementData, judgedNote) => {
-            //default value: this.sendJudgeToDOM()
+            // default value: this.sendJudgeToDOM()
             // something you want to execute when judgementData is changed
 
             // `IMPORTANT` If you define this method as your own, score, lastJudgement, and combo would not automatically displayed in game.DOM.score, game.DOM.judgement, and game.DOM.combo
@@ -256,10 +263,10 @@ new Song({
     },
     chart: {
         easy: {
-            // chart
+            ...
         },
         hard: {
-            //chart
+            ...
         }
     }
 })
@@ -271,6 +278,7 @@ new Song({
 // new Note(expectedTime, noteDOMParams)
 // or
 // new Note(expectedTime, additionalData, noteDOMParams)
+
 new Short(100, {
     classNames: ['note', 'short'],
     moveAnimation: 'move',
@@ -340,7 +348,7 @@ class MyCustomNote extends Note {
             }
         )
 
-        //anything you want
+        // anything you want
     }
 }
 ```
@@ -392,7 +400,55 @@ instance2.play(song, mode)
 
 ### Examples
 
-### License
+#### Normal
+
+<p align="center">
+    <img src="./examples/images/normal.gif" style="height: 60vh;" />
+</p>
+
+[view code](./examples/games/normal.html)
+
+#### Deltria
+
+<p align="center">
+    <img src="./examples/images/deltria.gif" style="height: 60vh;" />
+</p>
+
+[view code](./examples/games/deltria.html)
+
+#### Quadria
+
+<p align="center">
+    <img src="./examples/images/quadria.gif" style="height: 60vh;" />
+</p>
+
+[view code](./examples/games/quadria.html)
+
+#### Hexios
+
+<p align="center">
+    <img src="./examples/images/hexios.gif" style="height: 60vh;" />
+</p>
+
+[view code](./examples/games/hexios.html)
+
+#### Rytus
+
+<p align="center">
+    <img src="./examples/images/rytus.gif" style="height: 60vh;" />
+</p>
+
+[view code](./examples/games/rytus.html)
+
+#### RTCTC
+
+<p align="center">
+    <img src="./examples/images/rtctc.gif" style="height: 60vh;" />
+</p>
+
+[view code](https://github.com/thmchit/rtctc)
+
+## License
 
 For inquiries, please contact juneekim7@gmail.com
 
