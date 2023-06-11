@@ -329,7 +329,7 @@ class MyCustomNote extends Note {
         else return 'none'
     }
 
-    constructor(expectedTime, additionalData, {
+    constructor(expectedTime, /* additionalData, */ {
         classNames,
         moveAnimation,
         fadeAnimation,
@@ -338,7 +338,6 @@ class MyCustomNote extends Note {
     }) {
         super(
             expectedTime,
-            additionalData,
             {
                 classNames,
                 moveAnimation,

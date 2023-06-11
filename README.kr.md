@@ -28,7 +28,7 @@
 
 - [osu!](https://osu.ppy.sh/home/)
 - [cytus](https://rayark.com/g/cytus/) \
-(You can make it similar with a little trick but it would be hard to make slide notes)
+(약간의 꼼수를 써서 비슷해 보이게 만들 수는 있으나, 슬라이드 노트를 구현하기 어려움)
 - [cytusII](https://rayark.com/g/cytus2/)
 
 ## 문서
@@ -94,7 +94,7 @@ const myRhythmGame = new Game({
 })
 ```
 
-#### Design your game elements
+#### 게임 요소 디자인하기
 
 ```css
 .lane {
@@ -325,7 +325,7 @@ class MyCustomNote extends Note {
         else return 'none'
     }
 
-    constructor(expectedTime, additionalData, {
+    constructor(expectedTime, /* additionalData, */ {
         classNames,
         moveAnimation,
         fadeAnimation,
@@ -334,7 +334,6 @@ class MyCustomNote extends Note {
     }) {
         super(
             expectedTime,
-            additionalData,
             {
                 classNames,
                 moveAnimation,
