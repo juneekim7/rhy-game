@@ -283,7 +283,12 @@ class Hold extends Long {
 }
 // #endregion
 
-type AdditionalData = LongRequiredData
+type AdditionalData = {
+    laneName: string,
+    lane: string,
+    index: number,
+    timePerBeat: number
+}
 // #endregion
 
 // #region song
@@ -440,7 +445,7 @@ class Game {
     private scorePerNote = 0
     private music: HTMLAudioElement = new Audio()
     private readonly createdNotes: Record<string, Note[]> = {}
-    private readonly isPressed: Record<string, boolean> = {}
+    public readonly isPressed: Record<string, boolean> = {}
     public readonly judgementData: JudgementData = {
         score: 0,
         combo: 0,
@@ -564,11 +569,13 @@ class Game {
     private countNote(actualChart: ActualChart) {
         let count = 0
 
-        for (const lane of Object.values(actualChart)) {
+        for (const laneName of Object.keys(actualChart)) {
+            const lane = actualChart[laneName]
             for (let index = 0; index < lane.length; index++) {
                 const noteChar = lane[index]
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar](this.expectedTime.getTime(), {
+                        laneName,
                         lane,
                         index,
                         timePerBeat: 0
@@ -602,6 +609,7 @@ class Game {
             const noteChar = lane[index]
             if (noteChar in this.notes) {
                 const note = this.notes[noteChar](this.expectedTime.getTime(), {
+                    laneName,
                     lane,
                     index,
                     timePerBeat

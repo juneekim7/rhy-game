@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>deltria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+    <link href="./deltria.css" rel="stylesheet">
+    <script src="../../dist/rhy-game.js"></script>
+</head>
+<body>
+    <div id="judgement-data">
+        score: <span id="score"></span> <br/>
+        combo: <span id="combo"></span> <br/>
+        <span id="judgement"></span>
+    </div>
+
+    <div id="background-up" style="display: none;"></div>
+    <div id="background-down"></div>
+
+    <div id="music-box"></div>
+    <div id="note-box">
+    </div>
+
+    <div class="delta up"></div>
+    <div class="mirror" style="width: 100vw; left: 0; animation: mirror 1000ms;"></div>
+    <div class="delta down" style="border-bottom: calc(50px * 1.732) solid #FFFFF0;"></div>
+
+    <div id="lane1" class="lane"></div>
+    <div id="lane2" class="lane"></div>
+    <div id="lane3" class="lane"></div>
+    <div id="lane4" class="lane"></div>
+
+    <script src="./play.js"></script>
+    <script>
+        game.sizePerBeat = '8vw'
+        game.laneSizeRatio = 10
+        game.judgementPosition = 0
+        game.notes.s = (expectedTime, additionalData) => {
+            if (['lane1', 'lane2'].includes(additionalData.laneName)) {
+                return new Normal(expectedTime, {
+                    moveAnimation: 'moveRight',
+                    fadeAnimation: 'fadeRight'
+                })
+            }
+            else {
+                return new Normal(expectedTime, {
+                    moveAnimation: 'moveLeft',
+                    fadeAnimation: 'fadeLeft'
+                })
+            }
+        }
+        game.notes.l = (expectedTime, additionalData) => {
+            if (['lane1', 'lane2'].includes(additionalData.laneName)) {
+                return new Long(expectedTime, additionalData, {
+                    moveAnimation: 'moveRight',
+                    fadeAnimation: 'fadeRight'
+                })
+            }
+            else {
+                return new Long(expectedTime, additionalData, {
+                    moveAnimation: 'moveLeft',
+                    fadeAnimation: 'fadeLeft'
+                })
+            }
+        }
+    </script>
+    <script>
+        // If you press more than 2 keys, the screen flips
+        let hasFliped = false
+        let isNormal = true
+
+        function flip() {
+            if (hasFliped) return
+
+            let pressed = 0
+            for (const isPressed of Object.values(game.isPressed)) {
+                if (isPressed) pressed++
+            }
+
+            if (pressed >= 1) {
+                if (isNormal) document.body.style.transform = 'rotate(180deg)'
+                else document.body.style.transform = 'none'
+                isNormal = !isNormal
+                hasFliped = true
+            }
+        }
+
+        function reset() {
+            hasFliped = false
+        }
+
+        function play() {
+            document.body.setAttribute('onkeydown', 'flip()')
+            document.body.setAttribute('onkeyup', 'reset()')
+            game.play(song, 'normal')
+        }
+    </script>
+</body>
+</html>

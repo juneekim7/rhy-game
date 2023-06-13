@@ -1,6 +1,8 @@
 ## 1.0.1
 - `MAIN UPDATE` Official released
 - `ADDED` Examples
+- `CHANGED` AdditionalData includes laneName
+- `CHANGED` Game.isPressed became public property
 
 ## 0.9.2
 - `ADDED` Touch event

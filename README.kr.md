@@ -184,9 +184,17 @@ new Game({
     ... /* 튜토리얼에 나온 필수 파라미터 */,
     // 채보의 글자들을 노트와 바인딩
     notes: {
-        n: (expectedTime) => new Tap(expectedTime),
-        l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
+        n: (expectedTime) => new Normal(expectedTime),
+        t: (expectedTime) => new Tap(expectedTime), // Normal note with touch event
+        l: (expectedTime, additionalData) => new Long(expectedTime, additionalData), 
+        h: (expectedTime, additionalData) => new Hold(expectedTime, additionalData), // Long note with touch event
         c: (expectedTime, additionalData) => new MyCustomNote(expectedTime, additionalData)
+        /* additionalData {
+            laneName,
+            lane,
+            index,
+            timePerBeat
+        } */
     }
     judgements: [
         // new Judgement(name, time, scoreRatio, isCombo)

@@ -396,11 +396,13 @@ class Game {
     }
     countNote(actualChart) {
         let count = 0;
-        for (const lane of Object.values(actualChart)) {
+        for (const laneName of Object.keys(actualChart)) {
+            const lane = actualChart[laneName];
             for (let index = 0; index < lane.length; index++) {
                 const noteChar = lane[index];
                 if (noteChar in this.notes) {
                     const note = this.notes[noteChar](this.expectedTime.getTime(), {
+                        laneName,
                         lane,
                         index,
                         timePerBeat: 0
@@ -430,6 +432,7 @@ class Game {
             const noteChar = lane[index];
             if (noteChar in this.notes) {
                 const note = this.notes[noteChar](this.expectedTime.getTime(), {
+                    laneName,
                     lane,
                     index,
                     timePerBeat
@@ -566,6 +569,7 @@ class Game {
     }
 }
 // #endregion
+/*
 if (typeof define !== 'function' && define.amd) {
     define([], function() {
         return {
@@ -573,14 +577,17 @@ if (typeof define !== 'function' && define.amd) {
             Note, Normal, Long,
             Tap, Hold,
             Song, Game
-        };
-    });
+        }
+    })
 }
+
 if (typeof exports !== 'undefined') {
+    // eslint-disable-next-line no-undef
     exports = {
         Judgement,
         Note, Normal, Long,
         Tap, Hold,
         Song, Game
-    };
+    }
 }
+*/ 

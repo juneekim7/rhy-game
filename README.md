@@ -188,9 +188,17 @@ new Game({
     ... /* Parameters that must be specified */,
     // bind characters in chart
     notes: {
-        n: (expectedTime) => new Tap(expectedTime),
-        l: (expectedTime, additionalData) => new Hold(expectedTime, additionalData),
+        n: (expectedTime) => new Normal(expectedTime),
+        t: (expectedTime) => new Tap(expectedTime), // Normal note with touch event
+        l: (expectedTime, additionalData) => new Long(expectedTime, additionalData), 
+        h: (expectedTime, additionalData) => new Hold(expectedTime, additionalData), // Long note with touch event
         c: (expectedTime, additionalData) => new MyCustomNote(expectedTime, additionalData)
+        /* additionalData {
+            laneName,
+            lane,
+            index,
+            timePerBeat
+        } */
     }
     judgements: [
         // new Judgement(name, time, scoreRatio, isCombo)

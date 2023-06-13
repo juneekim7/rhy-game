@@ -30,6 +30,7 @@ const game = new Game({
 const song = new Song({
     info: {
         music: './염라.mp3',
+        volume: 0.5,
         title: '염라',
         artist: '달의 하루',
 

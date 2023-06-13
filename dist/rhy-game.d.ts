@@ -51,7 +51,12 @@ declare class Hold extends Long {
     judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, longRequiredData: LongRequiredData, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);
 }
-type AdditionalData = LongRequiredData;
+type AdditionalData = {
+    laneName: string;
+    lane: string;
+    index: number;
+    timePerBeat: number;
+};
 declare class Info {
     readonly music: string;
     readonly title: string;
@@ -148,7 +153,7 @@ declare class Game {
     private scorePerNote;
     private music;
     private readonly createdNotes;
-    private readonly isPressed;
+    readonly isPressed: Record<string, boolean>;
     readonly judgementData: JudgementData;
     set laneSizeRatio(ratio: number);
     get laneSizeRatio(): number;
