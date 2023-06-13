@@ -1,4 +1,6 @@
 "use strict";
+// Copyright (c) 2023 준이 (Junee, juneekim7)
+// Released under the MIT License.
 class Judgement {
     static miss = new Judgement('miss', 0, 0, false);
     name;

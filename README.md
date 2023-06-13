@@ -410,7 +410,7 @@ instance2.play(song, mode)
 
 ### Examples
 
-Example song used is Dareharu 『Karma』, and I do not own the copyright of the song or album cover.
+Example song used is Dareharu 『Karma』, and the developer of rhy-game does not own the copyright of the song or album cover.
 
 #### Riano tiles
 
@@ -419,7 +419,7 @@ Example song used is Dareharu 『Karma』, and I do not own the copyright of the
 </p>
 
 [view code](./examples/games/riano%20tiles.html) \
-(Mimicing the original game [Piano tiles 2](https://apps.apple.com/us/app/piano-tiles-2-piano-game/id1027688889))
+(This is an imitation of the original game [Piano tiles 2](https://apps.apple.com/us/app/piano-tiles-2-piano-game/id1027688889))
 
 #### Deltria
 
@@ -445,7 +445,7 @@ Example song used is Dareharu 『Karma』, and I do not own the copyright of the
 </p>
 
 [view code](./examples/games/rytus.html) \
-(Mimicing the original game [cytusII](https://rayark.com/g/cytus2/))
+(This is an imitation of the original game [cytusII](https://rayark.com/g/cytus2/))
 
 #### RTCTC
 

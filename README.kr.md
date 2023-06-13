@@ -406,13 +406,16 @@ instance2.play(song, mode)
 
 ### 예시
 
-#### 리아노 타일
+예시 사용된 곡은 달의하루 - 염라이며, rhy-game의 개발자는 곡과 앨범 커버의 저작권을 소유하고 있지 않습니다.
+
+#### Riano tiles
 
 <p align="center">
     <img src="./examples/images/riano tiles.gif" style="height: 60vh;" />
 </p>
 
-[코드 보기](./examples/games/riano%20tiles.html)
+[코드 보기](./examples/games/riano%20tiles.html) \
+(원본 게임 [Piano tiles 2](https://apps.apple.com/us/app/piano-tiles-2-piano-game/id1027688889)을 모방해 만든 것입니다.)
 
 #### Deltria
 
@@ -428,7 +431,8 @@ instance2.play(song, mode)
     <img src="./examples/images/hexios.gif" style="height: 60vh;" />
 </p>
 
-[코드 보기](./examples/games/hexios.html)
+[코드 보기](./examples/games/hexios.html) \
+(Designed by tpof)
 
 #### Rytus
 
@@ -436,9 +440,10 @@ instance2.play(song, mode)
     <img src="./examples/images/rytus.gif" style="height: 60vh;" />
 </p>
 
-[코드 보기](./examples/games/rytus.html)
+[코드 보기](./examples/games/rytus.html) \
+(원본 게임 [cytusII](https://rayark.com/g/cytus2/)를 모방해 만든 것입니다.)
 
-#### 리;듬칫듬칫
+#### RTCTC
 
 <p align="center">
     <img src="./examples/images/rtctc.gif" style="height: 60vh;" />
