@@ -4,6 +4,7 @@
 - `CHANGED` AdditionalData includes laneName
 - `CHANGED` Game.isPressed became public property
 - `CHANGED` Note.noteDOM became Note.DOM and public property
+- `FIXED` Game.isPressed does not contain lane names as keys
 
 ## 0.9.2
 - `ADDED` Touch event

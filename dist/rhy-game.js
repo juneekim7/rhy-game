@@ -459,9 +459,9 @@ class Game {
         }, timePerBeat * beat - this.expectedTime.getTime());
     }
     // #region setting
-    setKeyBind(actualChart) {
-        for (const laneName in actualChart) {
-            this.isPressed[laneName] = false;
+    setKeyBind() {
+        for (const key of Object.keys(this.keybind)) {
+            this.isPressed[key] = false;
         }
         window.addEventListener('keydown', (event) => {
             if (!(event.key in this.keybind) || this.isPressed[event.key])
@@ -495,7 +495,7 @@ class Game {
         }
     }
     setEvent(actualChart) {
-        this.setKeyBind(actualChart);
+        this.setKeyBind();
         this.setTouch(actualChart);
     }
     // #endregion

@@ -8,7 +8,7 @@
 
 "Make your own web rhythm game easily!"
 
-Most rhythm games have similar features and mechanism except for design, details, and a bit of personality. With rhy-game, you can make your own note-based web rhythm game. Since your game is on the web, it will be lightweight and accessible to people.
+Most rhythm games are characterized by having common features except for some designs and personalities. rhy-game is a library that helps you easily create your own rhythm game by taking advantage of the characteristic of rhythm games. With rhy-game, you can create a rhythm game that many people can enjoy without requiring a large capacity.
 
 ### Features
 
@@ -76,6 +76,8 @@ const { Game } = require('rhy-game')
 
 ### Quick Start
 
+The arguments in [Quick Start](#quick-start) are required values ​​for required parameters.
+
 #### Make new game and bind HTML DOM elements
 
 ```js
@@ -97,8 +99,8 @@ const myRhythmGame = new Game({
         j: 'lane3',
         k: 'lane4'
     },
-    sizePerBeat: '25vh',
-    laneSizeRaio: 4
+    sizePerBeat: '12.5vh',
+    laneSizeRaio: 8
 })
 ```
 
@@ -204,8 +206,10 @@ new Game({
         // new Judgement(name, time, scoreRatio, isCombo)
         new Judgement('perfect', 50, 1, true),
         new Judgement('great', 100, 0.5, true),
-        new Judgement('bad', 50, 0.3, false)
+        new Judgement('bad', 500, 0.3, false)
         // miss is automatically generated
+
+        // judgment is determined according to time, which is error (unit: ms)
     ],
     maxScore: 1000,
     delay: 500,
@@ -238,11 +242,26 @@ new Game({
     }
 ```
 
+you can also read these properties as well
+
+```js
+const game = new Game(...)
+
+game.isPressed // [string]: boolean object of key pressed
+game.judgementData // Object which contains score, combo, maxCombo, lastJudgement, and judgements
+```
+
 #### Judgement
 
 ```js
 // new Judgement(name, time, scoreRatio, isCombo)
 new Judgement('perfect', 50, 1, true)
+```
+
+There is a static property(type: Judgement) of miss judgement
+
+```js
+Judgement.miss
 ```
 
 #### Song
@@ -311,6 +330,16 @@ new Long(100, {
 })
 ```
 
+you can also read these properties as well
+
+```js
+class SomeNote extends Note { ... }
+const note = new SomeNote(...)
+
+note.hasJudged // boolean value indicating the judgement is complete
+note.DOM // HTML DOM element of the note
+```
+
 ### Advanced
 
 #### Assign additional game options after creating an instance 
@@ -363,14 +392,59 @@ class MyCustomNote extends Note {
 }
 ```
 
-#### Things to help with making charts
-
-you can pass beat as third argument of game.play
+#### Pass beat as third argument of game.play when you make charts
 
 ```js
 const game = new Game()
 game.play(song, mode, beat)
 // the song would be played starting from beat
+```
+
+#### Divide the chart by sections and use | for readability
+
+```js
+// use
+const song = new Song({
+    info: { ... },
+    chart: {
+        mode1: [
+            {
+                lane1: '|****|***|****|s***|',
+                lane2: '|****|***|***s|*s**|',
+                lane3: '|****|***|**s*|****|',
+                lane4: '|****|***|*s**|****|',
+                lane5: '|****|***|****|****|',
+                lane6: '|****|***|****|****|'
+            },
+            {
+                lane1: '||***s|s***|****|****||***s|s***|****|****||****|**s*|lll*|****||****|**s*|lll*|****||',
+                lane2: '||**s*|**s*|s***|****||**s*|**s*|s***|****||****|s***|****|****||****|s***|***s|****||',
+                lane3: '||*s**|s***|**s*|s***||*s**|s***|**s*|**s*||**s*|****|****|**s*||**s*|****|****|****||',
+                lane4: '||s***|****|s***|**s*||s***|****|s***|s***||s***|****|***s|****||s***|****|****|****||',
+                lane5: '||****|****|****|****||****|****|****|****||****|****|lll*|****||****|****|lll*|****||',
+                lane6: '||****|****|****|****||****|****|****|****||****|****|***s|****||****|****|***s|****||'
+            },
+            ...
+        ]
+    }
+})
+
+// DO NOT use
+const song = new Song({
+    info: { ... },
+    chart: {
+        mode1: [
+            {
+                lane1: '***********s******ss**************ss*****************s*lll***********s*lll*****...',
+                lane2: '**********s*s****s***s*s*********s***s*s***********s***************s******s****...',
+                lane3: '*********s******s**s*****s*s****s**s*****s***s***s***********s***s*************...',
+                lane4: '********s******s*******s*****s*s*******s***s***s**********s****s***************...',
+                lane5: '*******************************************************lll*************lll*****...',
+                lane6: '**********************************************************s***************s****...'
+            }
+        ]
+    }
+})
 ```
 
 ### Design Tips

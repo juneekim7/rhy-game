@@ -641,9 +641,9 @@ class Game {
     }
 
     // #region setting
-    private setKeyBind(actualChart: ActualChart) {
-        for (const laneName in actualChart) {
-            this.isPressed[laneName] = false
+    private setKeyBind() {
+        for (const key of Object.keys(this.keybind)) {
+            this.isPressed[key] = false
         }
 
         window.addEventListener('keydown', (event) => {
@@ -683,7 +683,7 @@ class Game {
     }
 
     private setEvent(actualChart: ActualChart) {
-        this.setKeyBind(actualChart)
+        this.setKeyBind()
         this.setTouch(actualChart)
     }
     // #endregion
