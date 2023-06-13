@@ -24,7 +24,7 @@ declare abstract class Note {
     hasJudged: boolean;
     judgement: 'none' | Judgement;
     count: number;
-    private noteDOM;
+    readonly DOM: HTMLElement;
     createDOM(laneDOM: HTMLBodyElement, moveTime: number, sizePerBeat: string, laneSizeRatio: number): void;
     judge(judgements: Judgement[], eventName: EventName, actualTime: number): Judgement | "none";
     constructor(expectedTime: number, { classNames, moveAnimation, fadeAnimation, timingFunction, sizeRatio }?: NoteDOMParams);

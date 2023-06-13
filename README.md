@@ -410,13 +410,16 @@ instance2.play(song, mode)
 
 ### Examples
 
+Example song used is Dareharu 『Karma』, and I do not own the copyright of the song or album cover.
+
 #### Riano tiles
 
 <p align="center">
     <img src="./examples/images/riano tiles.gif" style="height: 60vh;" />
 </p>
 
-[view code](./examples/games/riano%20tiles.html)
+[view code](./examples/games/riano%20tiles.html) \
+(Mimicing the original game [Piano tiles 2](https://apps.apple.com/us/app/piano-tiles-2-piano-game/id1027688889))
 
 #### Deltria
 
@@ -426,21 +429,14 @@ instance2.play(song, mode)
 
 [view code](./examples/games/deltria.html)
 
-#### Quadria
-
-<p align="center">
-    <img src="./examples/images/quadria.gif" style="height: 60vh;" />
-</p>
-
-[view code](./examples/games/quadria.html)
-
 #### Hexios
 
 <p align="center">
     <img src="./examples/images/hexios.gif" style="height: 60vh;" />
 </p>
 
-[view code](./examples/games/hexios.html)
+[view code](./examples/games/hexios.html) \
+(Designed by tpof)
 
 #### Rytus
 
@@ -448,7 +444,8 @@ instance2.play(song, mode)
     <img src="./examples/images/rytus.gif" style="height: 60vh;" />
 </p>
 
-[view code](./examples/games/rytus.html)
+[view code](./examples/games/rytus.html) \
+(Mimicing the original game [cytusII](https://rayark.com/g/cytus2/))
 
 #### RTCTC
 

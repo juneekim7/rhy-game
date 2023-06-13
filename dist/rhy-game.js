@@ -29,23 +29,23 @@ class Note {
     hasJudged;
     judgement;
     count;
-    noteDOM;
+    DOM;
     createDOM(laneDOM, moveTime, sizePerBeat, laneSizeRatio) {
         if (this.hasJudged)
             return;
         for (const className of this.classNames) {
-            const currentClass = this.noteDOM.getAttribute('class') ?? '';
-            this.noteDOM.setAttribute('class', currentClass + ' ' + className);
+            const currentClass = this.DOM.getAttribute('class') ?? '';
+            this.DOM.setAttribute('class', currentClass + ' ' + className);
         }
-        this.noteDOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`);
-        this.noteDOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
-        this.noteDOM.addEventListener('animationend', () => {
-            this.noteDOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
-            this.noteDOM.addEventListener('animationend', () => {
-                this.noteDOM.remove();
+        this.DOM.style.setProperty('--size', `calc(${sizePerBeat} * ${this.sizeRatio})`);
+        this.DOM.style.animation = `${moveTime}ms ${this.timingFunction} ${this.moveAnimation}`;
+        this.DOM.addEventListener('animationend', () => {
+            this.DOM.style.animation = `${moveTime / laneSizeRatio * this.sizeRatio}ms ${this.timingFunction} ${this.fadeAnimation}`;
+            this.DOM.addEventListener('animationend', () => {
+                this.DOM.remove();
             });
         });
-        laneDOM.appendChild(this.noteDOM);
+        laneDOM.appendChild(this.DOM);
     }
     judge(judgements, eventName, actualTime) {
         if (this.hasJudged)
@@ -74,7 +74,7 @@ class Note {
         this.hasJudged = false;
         this.judgement = 'none';
         this.count = 1;
-        this.noteDOM = document.createElement('div');
+        this.DOM = document.createElement('div');
     }
 }
 // #region basic note

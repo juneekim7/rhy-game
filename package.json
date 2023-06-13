@@ -5,8 +5,9 @@
   "main": "./dist/rhy-game.js",
   "types": "./dist/rhy-game.d.ts",
   "scripts": {
-    "build": "tsc -p . -w",
+    "dev": "tsc -p . -w",
     "minify": "uglifyjs ./dist/rhy-game.js -o ./dist/rhy-game.min.js",
+    "build": "tsc -p . && uglifyjs ./dist/rhy-game.js -o ./dist/rhy-game.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

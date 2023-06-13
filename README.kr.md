@@ -422,14 +422,6 @@ instance2.play(song, mode)
 
 [코드 보기](./examples/games/deltria.html)
 
-#### Quadria
-
-<p align="center">
-    <img src="./examples/images/quadria.gif" style="height: 60vh;" />
-</p>
-
-[코드 보기](./examples/games/quadria.html)
-
 #### Hexios
 
 <p align="center">

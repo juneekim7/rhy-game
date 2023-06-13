@@ -3,6 +3,7 @@
 - `ADDED` Examples
 - `CHANGED` AdditionalData includes laneName
 - `CHANGED` Game.isPressed became public property
+- `CHANGED` Note.noteDOM became Note.DOM and public property
 
 ## 0.9.2
 - `ADDED` Touch event

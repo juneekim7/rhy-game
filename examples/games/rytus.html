@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rytus</title>
+    <link href="./rytus.css" rel="stylesheet">
+    <script src="../../dist/rhy-game.js"></script>
+</head>
+<body>
+    <div id="judgement-data">
+        <div id="score"></div>
+        <div id="combo"></div>
+        <div id="judgement"></div>
+    </div>
+
+    <div id="border-up"></div>
+    <div id="border-down"></div>
+    <div id="line"></div>
+
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+    <div class="lane"></div>
+
+    <script src="./play.js"></script>
+    <script>
+        game.DOM.lane5 = document.getElementsByClassName('lane')[4]
+        game.DOM.lane6 = document.getElementsByClassName('lane')[5]
+
+        game.sizePerBeat = '7vw'
+        game.laneSizeRatio = 8
+    </script>
+    <script>
+        const moveTime = song.info.timePerBeat * game.laneSizeRatio
+        const timeDist = song.info.timePerBeat * song.info.split / 70
+        let timer
+
+        let direction = 1
+        const borderUp = 15
+        const borderDown = 85
+        let position = borderUp
+
+        function calcPos() {
+            let dir = direction
+            let pos = position
+            for (let i = 0; i < moveTime / timeDist; i++) {
+                const isInRange = (borderUp <= pos && pos <= borderDown)
+                if (!isInRange) dir *= -1
+                pos += 1 * dir
+            }
+            return pos - 15
+        }
+
+        game.event.load = (game, note) => {
+            console.log(note.DOM)
+            note.DOM.style.top = calcPos() + 'vh'
+        }
+    
+        function moveLine(i = 0) {
+            const isInRange = (borderUp <= position && position <= borderDown)
+            if (!isInRange) direction *= -1
+            position += 1 * direction
+            document.getElementById('line').style.top = position + 'vh'
+
+            setTimeout(() => moveLine(i + 1), timeDist * i - timer.getTime())
+        }
+
+        function play() {
+            document.body.removeAttribute('onkeydown')
+            game.play(song, 'normal')
+            timer = new Timer()
+            moveLine()
+        }
+    </script>
+</body>
+</html>

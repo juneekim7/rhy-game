@@ -14,11 +14,11 @@ const game = new Game({
         judgement: document.getElementById('judgement')
     },
     keybind: {
-        d: 'lane1',
-        f: 'lane2',
-        j: 'lane3',
-        k: 'lane4',
-        s: 'lane5',
+        s: 'lane1',
+        d: 'lane2',
+        f: 'lane3',
+        j: 'lane4',
+        k: 'lane5',
         l: 'lane6'
     },
     notes: {
