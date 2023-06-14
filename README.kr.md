@@ -480,7 +480,9 @@ instance2.play(song, mode)
 
 ### 예시
 
-예시 사용된 곡은 달의하루 - 염라이며, rhy-game의 개발자는 곡과 앨범 커버의 저작권을 소유하고 있지 않습니다.
+예시 사용된 곡은 달의하루 - 염라이며, rhy-game의 개발자는 곡과 앨범 커버의 저작권을 소유하고 있지 않습니다. \
+4 레인 키 바인딩: d, f, g, h \
+6 레인 키 바인딩: d, f, g, h, j, k
 
 #### Riano tiles
 
@@ -488,6 +490,7 @@ instance2.play(song, mode)
     <img src="./examples/images/riano tiles.gif" style="height: 60vh;" />
 </p>
 
+[플레이](https://rhy-game.netlify.app/examples/games/riano%20tiles) \
 [코드 보기](./examples/games/riano%20tiles.html) \
 (원본 게임 [Piano tiles 2](https://apps.apple.com/us/app/piano-tiles-2-piano-game/id1027688889)을 모방해 만든 것입니다.)
 
@@ -497,6 +500,7 @@ instance2.play(song, mode)
     <img src="./examples/images/deltria.gif" style="height: 60vh;" />
 </p>
 
+[플레이](https://rhy-game.netlify.app/examples/games/deltria) \
 [코드 보기](./examples/games/deltria.html)
 
 #### Hexios
@@ -505,6 +509,7 @@ instance2.play(song, mode)
     <img src="./examples/images/hexios.gif" style="height: 60vh;" />
 </p>
 
+[플레이](https://rhy-game.netlify.app/examples/games/hexios) \
 [코드 보기](./examples/games/hexios.html) \
 (Designed by tpof)
 
@@ -514,6 +519,7 @@ instance2.play(song, mode)
     <img src="./examples/images/rytus.gif" style="height: 60vh;" />
 </p>
 
+[플레이](https://rhy-game.netlify.app/examples/games/rytus) \
 [코드 보기](./examples/games/rytus.html) \
 (원본 게임 [cytusII](https://rayark.com/g/cytus2/)를 모방해 만든 것입니다.)
 
