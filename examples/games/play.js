@@ -62,7 +62,9 @@ const song = new Song({
 
 function play() {
     document.body.removeAttribute('onkeydown')
+    document.body.removeAttribute('ontouchstart')
     game.play(song, 'normal')
 }
 
 document.body.setAttribute('onkeydown', 'play()')
+document.body.setAttribute('ontouchstart', 'play()')
