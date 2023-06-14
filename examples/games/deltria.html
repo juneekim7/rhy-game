@@ -93,6 +93,7 @@
 
         function play() {
             document.body.setAttribute('onkeydown', 'flip()')
+            document.body.removeAttribute('ontouchstart')
             document.body.setAttribute('onkeyup', 'reset()')
             game.play(song, 'normal')
         }

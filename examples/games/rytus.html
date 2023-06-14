@@ -71,6 +71,7 @@
 
         function play() {
             document.body.removeAttribute('onkeydown')
+            document.body.removeAttribute('ontouchstart')
             game.play(song, 'normal')
             timer = new Timer()
             moveLine()
