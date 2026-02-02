@@ -100,7 +100,7 @@ const myRhythmGame = new Game({
         k: 'lane4'
     },
     sizePerBeat: '12.5vh',
-    laneSizeRaio: 8
+    laneSizeRatio: 8
 })
 ```
 
